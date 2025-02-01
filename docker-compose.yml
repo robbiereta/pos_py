@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/pos_db
+      - SW_URL=${SW_URL}
+      - SW_TOKEN=${SW_TOKEN}
+      - SAT_RFC=${SAT_RFC}
+      - SAT_NOMBRE=${SAT_NOMBRE}
+      - SAT_REGIMEN_FISCAL=${SAT_REGIMEN_FISCAL}
+      - SAT_CP=${SAT_CP}
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=pos_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    restart: always
+
+volumes:
+  postgres_data:

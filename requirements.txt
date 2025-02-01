@@ -1,0 +1,14 @@
+Flask==2.3.3
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.20
+python-dotenv==1.0.0
+requests==2.31.0  # For SW Sapien API calls
+reportlab==3.6.12  # PDF invoice generation
+qrcode==7.3.1  # For generating QR codes on invoices
+gunicorn==21.2.0
+python-dateutil==2.8.2
+Werkzeug==2.3.7
+Flask-Migrate==4.0.4    # Database migrations
+Flask-Script==2.0.6     # CLI commands
+pytest==8.3.4
+pytest-cov==6.0.0

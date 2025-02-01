@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>POS con Facturación CFDI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Punto de Venta</h1>
+        
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="pos-tab" data-bs-toggle="tab" href="#pos" role="tab">Ventas</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="global-invoice-tab" data-bs-toggle="tab" href="#global-invoice" role="tab">Factura Global</a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- POS Tab -->
+            <div class="tab-pane fade show active" id="pos" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h2>Productos</h2>
+                        <table id="productTable" class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Precio</th>
+                                    <th>Stock</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productList"></tbody>
+                        </table>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">Agregar Producto</button>
+                    </div>
+                    <div class="col-md-6">
+                        <h2>Carrito de Compra</h2>
+                        <table id="cartTable" class="table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cartList"></tbody>
+                        </table>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>Total: $<span id="totalAmount">0.00</span></h5>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="generateInvoice">
+                                    <label class="form-check-label" for="generateInvoice">
+                                        Generar Factura Individual
+                                    </label>
+                                </div>
+                                <button id="checkoutBtn" class="btn btn-success">Finalizar Venta</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Invoice Tab -->
+            <div class="tab-pane fade" id="global-invoice" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <h2>Facturación Global</h2>
+                        <div class="card">
+                            <div class="card-body">
+                                <h3>Ventas Pendientes de Facturar</h3>
+                                <table id="pendingSalesTable" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Fecha</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pendingSalesList"></tbody>
+                                </table>
+                                <div class="mb-3">
+                                    <label for="invoiceDate" class="form-label">Fecha de Facturación</label>
+                                    <input type="date" class="form-control" id="invoiceDate">
+                                </div>
+                                <button id="generateGlobalInvoiceBtn" class="btn btn-primary">Generar Factura Global</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <h3>Historial de Facturas Globales</h3>
+                        <table id="globalInvoiceHistory" class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>UUID</th>
+                                    <th>Total</th>
+                                    <th>IVA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="globalInvoiceList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <input type="text" class="form-control mb-2" id="productName" placeholder="Nombre del Producto" required>
+                        <input type="number" class="form-control mb-2" id="productPrice" placeholder="Precio" step="0.01" required>
+                        <input type="number" class="form-control mb-2" id="productStock" placeholder="Stock" required>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/pos.js"></script>
+</body>
+</html>
