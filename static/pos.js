@@ -10,13 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateGlobalInvoiceBtn = document.getElementById('generateGlobalInvoiceBtn');
     const invoiceDateInput = document.getElementById('invoiceDate');
 
-    if (invoiceDateInput) {
-        const today = new Date().toISOString().split('T')[0];
-        invoiceDateInput.value = today;
-    }
-
     let products = [];
     let cart = [];
+
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    invoiceDateInput.value = today;
 
     // Fetch and display products
     async function loadProducts() {

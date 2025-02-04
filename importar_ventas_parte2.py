@@ -2,15 +2,20 @@ from app import create_app
 from models import db, Sale
 import pandas as pd
 from datetime import datetime
+from convertir_ventas import convertir_ventas
 
-def importar_ventas(archivo_excel):
+def importar_ventas(archivo_excel_origen):
     # Crear la aplicación y el contexto
     app = create_app()
     
     with app.app_context():
         try:
-            # Leer el archivo Excel
-            df = pd.read_excel(archivo_excel)
+            print("\nConvirtiendo ventas del archivo:", archivo_excel_origen)
+            df_ventas = convertir_ventas(archivo_excel_origen, "temp_ventas_convertidas.xlsx")
+            
+            if df_ventas is None:
+                print("Error durante la conversión de ventas.")
+                return
             
             # Contador de ventas importadas
             ventas_importadas = 0
@@ -19,7 +24,7 @@ def importar_ventas(archivo_excel):
             print("\nIniciando importación de ventas...")
             
             # Procesar cada venta
-            for _, row in df.iterrows():
+            for _, row in df_ventas.iterrows():
                 try:
                     # Crear objeto de venta
                     venta = Sale(
@@ -55,5 +60,5 @@ def importar_ventas(archivo_excel):
             db.session.rollback()
 
 if __name__ == "__main__":
-    archivo_excel = "ventas_enero_convertidas.xlsx"
+    archivo_excel = "ventasenero25_parte2.xlsx"
     importar_ventas(archivo_excel)

@@ -49,7 +49,7 @@ const loadStats = async (filters = {}) => {
 };
 
 // Cargar ventas
-async function loadSales(page = 1, filters = {}) {
+const loadSales = async (page = 1, filters = {}) => {
     try {
         const params = new URLSearchParams({
             page: page,
@@ -63,23 +63,13 @@ async function loadSales(page = 1, filters = {}) {
         if (filters.maxAmount) params.append('max_amount', filters.maxAmount);
 
         const response = await fetch(`/sales?${params.toString()}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
         const data = await response.json();
-        
-        if (!data || !data.sales) {
-            console.error('Invalid data format received:', data);
-            return;
-        }
 
+        // Limpiar tabla
         const salesList = document.getElementById('salesList');
-        if (!salesList) {
-            console.error('Sales list not found');
-            return;
-        }
-
         salesList.innerHTML = '';
+
+        // Agregar ventas
         data.sales.forEach(sale => {
             const row = document.createElement('tr');
             row.innerHTML = `

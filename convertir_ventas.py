@@ -78,12 +78,15 @@ def convertir_ventas(archivo_origen, archivo_destino):
         print(f"\nArchivo guardado como: {archivo_destino}")
         print("Las ventas están listas para ser importadas al sistema.")
         
+        return df_ventas
+        
     except Exception as e:
         print(f"Error durante la conversión: {str(e)}")
+        return None
 
 if __name__ == "__main__":
     archivo_origen = "ventasenero25_parte2.xlsx"
     archivo_destino = "ventas_enero_parte2_convertidas.xlsx"
     
     print("Iniciando conversión de ventas...")
-    convertir_ventas(archivo_origen, archivo_destino)
+    df_ventas = convertir_ventas(archivo_origen, archivo_destino)
