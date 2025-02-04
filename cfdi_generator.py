@@ -218,61 +218,78 @@ class CFDIGenerator:
         Generate a global CFDI for multiple sales
         """
         try:
-            # Calcular totales
+            # Prepare data
+            emisor = self._prepare_emisor()
+            receptor = self._prepare_receptor()
+            
+            # Calculate totals
             total_amount = sum(sale.total_amount for sale in sales)
-            # El IVA ya está incluido en el total, así que lo extraemos (16%)
+            # VAT is included in total, so we extract it (16%)
             subtotal = total_amount / 1.16
             tax_amount = total_amount - subtotal
-
-            # Preparar el comprobante
+            
+            # Prepare concepts
+            concepts = []
+            for sale in sales:
+                # Extract VAT from sale total
+                sale_subtotal = sale.total_amount / 1.16
+                sale_tax = sale.total_amount - sale_subtotal
+                
+                concept = {
+                    "ClaveProdServ": "01010101",
+                    "Cantidad": "1",
+                    "ClaveUnidad": "ACT",
+                    "Descripcion": f"Venta #{sale.id}",
+                    "ValorUnitario": f"{sale_subtotal:.2f}",
+                    "Importe": f"{sale_subtotal:.2f}",
+                    "ObjetoImp": "02",
+                    "Impuestos": {
+                        "Traslados": [
+                            {
+                                "Base": f"{sale_subtotal:.2f}",
+                                "Impuesto": "002",
+                                "TipoFactor": "Tasa",
+                                "TasaOCuota": "0.160000",
+                                "Importe": f"{sale_tax:.2f}"
+                            }
+                        ]
+                    }
+                }
+                concepts.append(concept)
+            
+            # Prepare CFDI data
             comprobante = {
                 "Version": "4.0",
-                "Serie": "G",  # G para facturas globales
+                "Serie": "G",
                 "Fecha": date.strftime("%Y-%m-%dT%H:%M:%S"),
-                "FormaPago": "01",  # 01 - Efectivo
+                "FormaPago": "01",
                 "SubTotal": f"{subtotal:.2f}",
                 "Moneda": "MXN",
                 "Total": f"{total_amount:.2f}",
-                "TipoDeComprobante": "I",  # I - Ingreso
-                "Exportacion": "01",  # 01 - No aplica
-                "MetodoPago": "PUE",  # PUE - Pago en una sola exhibición
-                "LugarExpedicion": os.getenv('SAT_CP', '00000'),
-                "Emisor": self._prepare_emisor(),
-                "Receptor": self._prepare_receptor(True),
-                "Conceptos": [{
-                    "ClaveProdServ": "01010101",  # No existe en el catálogo
-                    "Cantidad": "1",
-                    "ClaveUnidad": "ACT",  # Actividad
-                    "Descripcion": "Venta",
-                    "ValorUnitario": f"{subtotal:.2f}",
-                    "Importe": f"{subtotal:.2f}",
-                    "ObjetoImp": "02",  # 02 - Sí objeto de impuesto
-                    "Impuestos": {
-                        "Traslados": [{
+                "TipoDeComprobante": "I",
+                "Exportacion": "01",
+                "MetodoPago": "PUE",
+                "LugarExpedicion": "87000",
+                "Emisor": emisor,
+                "Receptor": receptor,
+                "Conceptos": concepts,
+                "Impuestos": {
+                    "TotalImpuestosTrasladados": f"{tax_amount:.2f}",
+                    "Traslados": [
+                        {
                             "Base": f"{subtotal:.2f}",
-                            "Impuesto": "002",  # 002 - IVA
+                            "Impuesto": "002",
                             "TipoFactor": "Tasa",
                             "TasaOCuota": "0.160000",
                             "Importe": f"{tax_amount:.2f}"
-                        }]
-                    }
-                }],
-                "Impuestos": {
-                    "TotalImpuestosTrasladados": f"{tax_amount:.2f}",
-                    "Traslados": [{
-                        "Base": f"{subtotal:.2f}",
-                        "Impuesto": "002",  # 002 - IVA
-                        "TipoFactor": "Tasa",
-                        "TasaOCuota": "0.160000",
-                        "Importe": f"{tax_amount:.2f}"
-                    }]
+                        }
+                    ]
                 }
             }
-
-            # Timbrar el CFDI
-            response = self._call_sw_sapien_api(comprobante)
-            return response
-
+            
+            # Call SW Sapien API
+            return self._call_sw_sapien_api(comprobante)
+            
         except Exception as e:
             raise Exception(f"Error generating Global CFDI: {str(e)}")
 
