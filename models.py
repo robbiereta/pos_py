@@ -9,22 +9,25 @@ class Product(db.Model):
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, default=0)
-    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
     def to_dict(self):
         return {
-            "id": self.id,
-            "name": self.name,
-            "price": self.price,
-            "stock": self.stock
+            'id': self.id,
+            'name': self.name,
+            'price': self.price,
+            'stock': self.stock,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
 class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     total_amount = db.Column(db.Float, nullable=False)
     _products = db.Column('products', db.Text, nullable=False)
-    is_invoiced = db.Column(db.Boolean, default=False)
-    global_invoice_id = db.Column(db.Integer, db.ForeignKey('global_invoice.id'))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    global_invoice_id = db.Column(db.Integer, db.ForeignKey('global_invoice.id'), nullable=True)
     global_invoice = db.relationship('GlobalInvoice', back_populates='sales')
 
     @property
@@ -37,32 +40,29 @@ class Sale(db.Model):
 
     def to_dict(self):
         return {
-            "id": self.id,
-            "total_amount": self.total_amount,
-            "products": self.products,
-            "timestamp": self.timestamp.isoformat(),
-            "is_invoiced": self.is_invoiced
+            'id': self.id,
+            'total_amount': self.total_amount,
+            'products': self.products,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'global_invoice_id': self.global_invoice_id
         }
 
 class GlobalInvoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
-    tax_amount = db.Column(db.Float, nullable=False)
-    cfdi_uuid = db.Column(db.String(36), nullable=False)
-    xml_content = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
     sales = db.relationship('Sale', back_populates='global_invoice')
 
     def to_dict(self):
         return {
             'id': self.id,
-            'date': self.date.isoformat(),
+            'date': self.date.isoformat() if self.date else None,
             'total_amount': self.total_amount,
-            'tax_amount': self.tax_amount,
-            'cfdi_uuid': self.cfdi_uuid,
-            'xml_content': self.xml_content,
-            'created_at': self.created_at.isoformat()
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'num_sales': len(self.sales)
         }
 
 class Invoice(db.Model):

@@ -12,3 +12,5 @@ Flask-Migrate==4.0.4    # Database migrations
 Flask-Script==2.0.6     # CLI commands
 pytest==8.3.4
 pytest-cov==6.0.0
+pandas==2.1.0          # Para manejar archivos Excel
+openpyxl==3.1.2       # Para soporte de archivos xlsx
