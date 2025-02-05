@@ -45,11 +45,13 @@ class Sale(db.Model):
         }
 
 class GlobalInvoice(db.Model):
+    """Global invoice model"""
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
     tax_amount = db.Column(db.Float, nullable=False)
     cfdi_uuid = db.Column(db.String(36), nullable=False)
+    folio = db.Column(db.String(10))  # Added folio field
     xml_content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     sales = db.relationship('Sale', back_populates='global_invoice')
@@ -61,6 +63,7 @@ class GlobalInvoice(db.Model):
             'total_amount': self.total_amount,
             'tax_amount': self.tax_amount,
             'cfdi_uuid': self.cfdi_uuid,
+            'folio': self.folio,
             'xml_content': self.xml_content,
             'created_at': self.created_at.isoformat()
         }

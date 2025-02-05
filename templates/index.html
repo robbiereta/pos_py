@@ -213,13 +213,33 @@
                                         <thead>
                                             <tr>
                                                 <th>Fecha</th>
+                                                <th>Folio</th>
                                                 <th>UUID</th>
                                                 <th>Total</th>
-                                                <th>IVA</th>
                                                 <th>Acciones</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="globalInvoicesList"></tbody>
+                                        <tbody id="globalInvoicesList">
+                                            {% for invoice in global_invoices %}
+                                            <tr>
+                                                <td>{{ invoice.date }}</td>
+                                                <td>G-{{ invoice.folio }}</td>
+                                                <td>{{ invoice.cfdi_uuid }}</td>
+                                                <td>$ {{ "%.2f"|format(invoice.total_amount) }}</td>
+                                                <td>
+                                                    <a href="/download_global_xml/{{ invoice.cfdi_uuid }}" class="btn btn-primary btn-sm">
+                                                        <i class="bi bi-file-code"></i> XML Local
+                                                    </a>
+                                                    <a href="/download_global_xml_from_pac/{{ invoice.cfdi_uuid }}" class="btn btn-info btn-sm">
+                                                        <i class="bi bi-cloud-download"></i> XML PAC
+                                                    </a>
+                                                    <a href="/download_global_pdf/{{ invoice.cfdi_uuid }}" class="btn btn-danger btn-sm">
+                                                        <i class="bi bi-file-pdf"></i> PDF
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
@@ -412,13 +432,19 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${invoice.date}</td>
+                        <td>G-${invoice.folio}</td>
                         <td>${invoice.cfdi_uuid}</td>
                         <td>$${invoice.total_amount.toFixed(2)}</td>
-                        <td>$${invoice.tax_amount.toFixed(2)}</td>
                         <td>
-                            <button class="btn btn-sm btn-info" onclick="downloadXML('${invoice.cfdi_uuid}')">
-                                <i class="bi bi-download"></i> XML
-                            </button>
+                            <a href="/download_global_xml/${invoice.cfdi_uuid}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-file-code"></i> XML Local
+                            </a>
+                            <a href="/download_global_xml_from_pac/${invoice.cfdi_uuid}" class="btn btn-info btn-sm">
+                                <i class="bi bi-cloud-download"></i> XML PAC
+                            </a>
+                            <a href="/download_global_pdf/${invoice.cfdi_uuid}" class="btn btn-danger btn-sm">
+                                <i class="bi bi-file-pdf"></i> PDF
+                            </a>
                         </td>
                     `;
                     tbody.appendChild(row);

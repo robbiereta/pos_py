@@ -1,5 +1,5 @@
 from models import db, Sale, GlobalInvoice, Invoice
-from cfdi_generator import cfdi_generator  # Usar el generador de prueba
+from cfdi_generator import cfdi_generator 
 from datetime import datetime, date
 from app import create_app
 import os
@@ -34,6 +34,7 @@ def generar_factura_global():
                 total_amount=total_amount,
                 tax_amount=tax_amount,
                 cfdi_uuid=result['uuid'],
+                folio=result['folio'],  # Save the folio
                 xml_content=result['xml']
             )
             
