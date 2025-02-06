@@ -25,6 +25,9 @@
             <li class="nav-item">
                 <a class="nav-link" id="product-tab" data-bs-toggle="tab" href="#product" role="tab">Gestión de Productos</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="clients-tab" data-bs-toggle="tab" href="#clients" role="tab">Gestión de Clientes</a>
+            </li>
         </ul>
 
         <!-- Tab Content -->
@@ -394,6 +397,57 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Client Management Tab -->
+            <div class="tab-pane fade" id="clients" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="card-title">Gestión de Clientes</h5>
+                                        <button class="btn btn-primary" onclick="openClientModal()">
+                                            <i class="fas fa-plus"></i> Nuevo Cliente
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Search Bar -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="clientSearch" 
+                                                       placeholder="Buscar por nombre, email, teléfono o RFC...">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="searchClients()">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Clients Table -->
+                                    <div class="table-responsive">
+                                        <table class="table" id="clientsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Email</th>
+                                                    <th>Teléfono</th>
+                                                    <th>RFC</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Clients will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -451,6 +505,47 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Modal -->
+    <div class="modal fade" id="clientModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="clientModalTitle">Nuevo Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="clientForm">
+                        <input type="hidden" id="clientId">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="clientName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="clientEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="clientPhone">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">RFC</label>
+                            <input type="text" class="form-control" id="clientRfc">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Dirección</label>
+                            <textarea class="form-control" id="clientAddress" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveClient()">Guardar</button>
                 </div>
             </div>
         </div>
@@ -1054,6 +1149,139 @@
 
             // Iniciar carga de productos
             loadProducts();
+
+            // Client Management Functions
+            function loadClients(search = '') {
+                fetch(`/clients${search ? '?search=' + encodeURIComponent(search) : ''}`)
+                    .then(response => response.json())
+                    .then(clients => {
+                        const tbody = document.querySelector('#clientsTable tbody');
+                        tbody.innerHTML = '';
+                        
+                        clients.forEach(client => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${client.name}</td>
+                                <td>${client.email || '-'}</td>
+                                <td>${client.phone || '-'}</td>
+                                <td>${client.rfc || '-'}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="editClient(${client.id})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteClient(${client.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading clients:', error);
+                        alert('Error al cargar los clientes');
+                    });
+            }
+
+            function searchClients() {
+                const search = document.getElementById('clientSearch').value;
+                loadClients(search);
+            }
+
+            function openClientModal(clientId = null) {
+                const modal = new bootstrap.Modal(document.getElementById('clientModal'));
+                const title = document.getElementById('clientModalTitle');
+                const form = document.getElementById('clientForm');
+                
+                // Reset form
+                form.reset();
+                document.getElementById('clientId').value = '';
+                
+                if (clientId) {
+                    title.textContent = 'Editar Cliente';
+                    // Load client data
+                    fetch(`/clients/${clientId}`)
+                        .then(response => response.json())
+                        .then(client => {
+                            document.getElementById('clientId').value = client.id;
+                            document.getElementById('clientName').value = client.name;
+                            document.getElementById('clientEmail').value = client.email || '';
+                            document.getElementById('clientPhone').value = client.phone || '';
+                            document.getElementById('clientRfc').value = client.rfc || '';
+                            document.getElementById('clientAddress').value = client.address || '';
+                            modal.show();
+                        })
+                        .catch(error => {
+                            console.error('Error loading client:', error);
+                            alert('Error al cargar los datos del cliente');
+                        });
+                } else {
+                    title.textContent = 'Nuevo Cliente';
+                    modal.show();
+                }
+            }
+
+            function saveClient() {
+                const clientId = document.getElementById('clientId').value;
+                const clientData = {
+                    name: document.getElementById('clientName').value,
+                    email: document.getElementById('clientEmail').value,
+                    phone: document.getElementById('clientPhone').value,
+                    rfc: document.getElementById('clientRfc').value,
+                    address: document.getElementById('clientAddress').value
+                };
+                
+                const method = clientId ? 'PUT' : 'POST';
+                const url = clientId ? `/clients/${clientId}` : '/clients';
+                
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(clientData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    bootstrap.Modal.getInstance(document.getElementById('clientModal')).hide();
+                    loadClients();
+                    alert(clientId ? 'Cliente actualizado con éxito' : 'Cliente creado con éxito');
+                })
+                .catch(error => {
+                    console.error('Error saving client:', error);
+                    alert('Error: ' + error.message);
+                });
+            }
+
+            function deleteClient(clientId) {
+                if (!confirm('¿Está seguro de que desea eliminar este cliente?')) {
+                    return;
+                }
+                
+                fetch(`/clients/${clientId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    loadClients();
+                    alert('Cliente eliminado con éxito');
+                })
+                .catch(error => {
+                    console.error('Error deleting client:', error);
+                    alert('Error: ' + error.message);
+                });
+            }
+
+            // Load clients when tab is shown
+            document.getElementById('clients-tab').addEventListener('shown.bs.tab', function (e) {
+                loadClients();
+            });
         });
     </script>
 

@@ -1,11 +1,10 @@
 from flask import Flask, request, jsonify, render_template, make_response
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_migrate import Migrate
-from models import db, Sale, Invoice, GlobalInvoice, Product, SaleDetail
 from datetime import datetime
 from cfdi_generator import cfdi_generator, cfdi_generator_prod
 from config import config
+from db import db
 import os
 from dotenv import load_dotenv
 from sqlalchemy import text
@@ -19,10 +18,17 @@ load_dotenv()
 def create_app(config_name='default'):
     app = Flask(__name__)
     CORS(app)  # Enable CORS for all routes
+    
+    # Load config
     app.config.from_object(config[config_name])
+    
+    # Initialize extensions
     db.init_app(app)
     migrate = Migrate(app, db)
-
+    
+    # Import models after db initialization
+    from models import Sale, Invoice, GlobalInvoice, Product, SaleDetail, Client
+    
     with app.app_context():
         db.create_all()
 
@@ -745,6 +751,136 @@ def create_app(config_name='default'):
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
+
+    # Client endpoints
+    @app.route('/clients', methods=['GET'])
+    def get_clients():
+        """Get all clients with optional search filter"""
+        try:
+            search = request.args.get('search', '').lower()
+            query = Client.query
+            
+            if search:
+                query = query.filter(
+                    db.or_(
+                        Client.name.ilike(f'%{search}%'),
+                        Client.email.ilike(f'%{search}%'),
+                        Client.phone.ilike(f'%{search}%'),
+                        Client.rfc.ilike(f'%{search}%')
+                    )
+                )
+            
+            clients = query.order_by(Client.name).all()
+            return jsonify([client.to_dict() for client in clients])
+        except Exception as e:
+            app.logger.error(f"Error in get_clients: {str(e)}")
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+
+    @app.route('/clients/<int:client_id>', methods=['GET'])
+    def get_client(client_id):
+        """Get a specific client by ID"""
+        try:
+            client = Client.query.get_or_404(client_id)
+            return jsonify(client.to_dict())
+        except Exception as e:
+            app.logger.error(f"Error in get_client: {str(e)}")
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+
+    @app.route('/clients', methods=['POST'])
+    def create_client():
+        """Create a new client"""
+        try:
+            data = request.get_json()
+            
+            if not data or 'name' not in data:
+                return jsonify({'error': 'Name is required'}), 400
+            
+            # Check for duplicate email
+            if data.get('email'):
+                existing = Client.query.filter_by(email=data['email']).first()
+                if existing:
+                    return jsonify({'error': 'Email already exists'}), 400
+            
+            client = Client(
+                name=data['name'],
+                email=data.get('email'),
+                phone=data.get('phone'),
+                rfc=data.get('rfc'),
+                address=data.get('address')
+            )
+            
+            db.session.add(client)
+            db.session.commit()
+            
+            return jsonify({
+                'message': 'Client created successfully',
+                'client': client.to_dict()
+            }), 201
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error in create_client: {str(e)}")
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+
+    @app.route('/clients/<int:client_id>', methods=['PUT'])
+    def update_client(client_id):
+        """Update a specific client"""
+        try:
+            client = Client.query.get_or_404(client_id)
+            data = request.get_json()
+            
+            if not data:
+                return jsonify({'error': 'No data provided'}), 400
+            
+            # Check for duplicate email if email is being changed
+            if 'email' in data and data['email'] != client.email:
+                existing = Client.query.filter_by(email=data['email']).first()
+                if existing:
+                    return jsonify({'error': 'Email already exists'}), 400
+            
+            # Update fields
+            if 'name' in data:
+                client.name = data['name']
+            if 'email' in data:
+                client.email = data['email']
+            if 'phone' in data:
+                client.phone = data['phone']
+            if 'rfc' in data:
+                client.rfc = data['rfc']
+            if 'address' in data:
+                client.address = data['address']
+            
+            db.session.commit()
+            
+            return jsonify({
+                'message': 'Client updated successfully',
+                'client': client.to_dict()
+            })
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error in update_client: {str(e)}")
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+
+    @app.route('/clients/<int:client_id>', methods=['DELETE'])
+    def delete_client(client_id):
+        """Delete a specific client"""
+        try:
+            client = Client.query.get_or_404(client_id)
+            
+            # Check if client has associated sales
+            if client.sales:
+                return jsonify({
+                    'error': 'Cannot delete client with associated sales',
+                    'sales_count': len(client.sales)
+                }), 400
+            
+            db.session.delete(client)
+            db.session.commit()
+            
+            return jsonify({'message': 'Client deleted successfully'})
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error in delete_client: {str(e)}")
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
     # Rutas para gestión de productos
     @app.route('/productos')
