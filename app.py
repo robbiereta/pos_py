@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_migrate import Migrate
-from models import db, Sale, Invoice, GlobalInvoice, Product
+from models import db, Sale, Invoice, GlobalInvoice, Product, SaleDetail
 from datetime import datetime
 from cfdi_generator import cfdi_generator, cfdi_generator_prod
 from config import config
@@ -25,6 +25,18 @@ def create_app(config_name='default'):
 
     with app.app_context():
         db.create_all()
+
+    # Configuración para subida de imágenes
+    UPLOAD_FOLDER = 'static/product_images'
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
+
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+    def allowed_file(filename):
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
     @app.route('/')
     def index():
@@ -74,20 +86,145 @@ def create_app(config_name='default'):
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
 
+    @app.route('/api/products', methods=['GET'])
+    def get_products_api():
+        products = Product.query.all()
+        return jsonify([product.to_dict() for product in products])
+
+    @app.route('/api/products', methods=['POST'])
+    def create_product():
+        try:
+            data = request.form.to_dict()
+            image = request.files.get('image')
+            
+            # Validar datos requeridos
+            if not data.get('name') or not data.get('price'):
+                return jsonify({'error': 'Nombre y precio son requeridos'}), 400
+            
+            # Procesar imagen si se proporcionó
+            image_url = None
+            if image and allowed_file(image.filename):
+                filename = secure_filename(image.filename)
+                # Agregar timestamp al nombre del archivo para evitar duplicados
+                filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
+                image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                image_url = f"/static/product_images/{filename}"
+            
+            # Crear nuevo producto
+            product = Product(
+                name=data['name'],
+                price=float(data['price']),
+                stock=int(data.get('stock', 0)),
+                description=data.get('description'),
+                sku=data.get('sku'),
+                image_url=image_url,
+                min_stock=int(data.get('min_stock', 0))
+            )
+            
+            db.session.add(product)
+            db.session.commit()
+            
+            return jsonify(product.to_dict()), 201
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+
+    @app.route('/api/products/<int:product_id>', methods=['PUT'])
+    def update_product(product_id):
+        try:
+            product = Product.query.get_or_404(product_id)
+            data = request.form.to_dict()
+            image = request.files.get('image')
+            
+            # Actualizar campos básicos
+            if 'name' in data:
+                product.name = data['name']
+            if 'price' in data:
+                product.price = float(data['price'])
+            if 'stock' in data:
+                product.stock = int(data['stock'])
+            if 'description' in data:
+                product.description = data['description']
+            if 'sku' in data:
+                product.sku = data['sku']
+            if 'min_stock' in data:
+                product.min_stock = int(data['min_stock'])
+                
+            # Procesar nueva imagen si se proporcionó
+            if image and allowed_file(image.filename):
+                # Eliminar imagen anterior si existe
+                if product.image_url:
+                    old_image_path = os.path.join(app.root_path, product.image_url.lstrip('/'))
+                    if os.path.exists(old_image_path):
+                        os.remove(old_image_path)
+                
+                filename = secure_filename(image.filename)
+                filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
+                image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                product.image_url = f"/static/product_images/{filename}"
+            
+            db.session.commit()
+            return jsonify(product.to_dict())
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+
+    @app.route('/api/products/<int:product_id>', methods=['DELETE'])
+    def delete_product(product_id):
+        try:
+            product = Product.query.get_or_404(product_id)
+            
+            # Eliminar imagen si existe
+            if product.image_url:
+                image_path = os.path.join(app.root_path, product.image_url.lstrip('/'))
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+            
+            db.session.delete(product)
+            db.session.commit()
+            return '', 204
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+
+    @app.route('/api/products/<int:product_id>', methods=['GET'])
+    def get_product(product_id):
+        product = Product.query.get_or_404(product_id)
+        return jsonify(product.to_dict())
+
     @app.route('/sales', methods=['POST'])
     def create_sale():
         """Create a new sale"""
-        data = request.get_json()
-        
-        if not data or 'total_amount' not in data or 'products' not in data:
-            return jsonify({'error': 'Invalid request data'}), 400
-            
-        sale = Sale(
-            total_amount=data['total_amount'],
-            products=data['products']
-        )
-        
         try:
+            data = request.get_json()
+            
+            if not data or 'total_amount' not in data or 'products' not in data:
+                return jsonify({'error': 'Invalid request data'}), 400
+            
+            # Create the sale
+            sale = Sale(
+                total_amount=data['total_amount'],
+                amount_received=data['amount_received'],
+                change_amount=data['change_amount']
+            )
+            
+            # Add sale details
+            for product_data in data['products']:
+                detail = SaleDetail(
+                    product_id=product_data['product_id'],
+                    quantity=product_data['quantity'],
+                    price=product_data['price']
+                )
+                sale.details.append(detail)
+                
+                # Update product stock
+                product = Product.query.get(product_data['product_id'])
+                if product:
+                    product.stock -= product_data['quantity']
+            
             db.session.add(sale)
             db.session.commit()
             
@@ -97,21 +234,29 @@ def create_app(config_name='default'):
                     generator = cfdi_generator if app.config['CFDI_TEST_MODE'] else cfdi_generator_prod
                     invoice_data = generator.generate_cfdi(sale)
                     return jsonify({
-                        'sale_id': sale.id,
+                        'id': sale.id,
                         'cfdi_invoice': invoice_data
                     })
                 except Exception as e:
-                    return jsonify({'error': str(e)}), 500
+                    app.logger.error(f"Error generating invoice: {str(e)}")
+                    return jsonify({
+                        'id': sale.id,
+                        'error': 'Could not generate invoice',
+                        'details': str(e)
+                    })
             
             return jsonify({
                 'message': 'Sale created successfully',
                 'id': sale.id,
                 'total_amount': sale.total_amount,
-                'products': sale.products
+                'amount_received': sale.amount_received,
+                'change_amount': sale.change_amount
             }), 201
+            
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': str(e)}), 500
+            app.logger.error(f"Error creating sale: {str(e)}")
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
     @app.route('/sales', methods=['GET'])
     def get_sales():
@@ -130,50 +275,79 @@ def create_app(config_name='default'):
             
             # Apply filters
             if start_date:
-                query = query.filter(Sale.timestamp >= datetime.strptime(start_date, '%Y-%m-%d'))
+                query = query.filter(Sale.date >= datetime.strptime(start_date, '%Y-%m-%d'))
             if end_date:
-                query = query.filter(Sale.timestamp <= datetime.strptime(end_date, '%Y-%m-%d'))
+                query = query.filter(Sale.date <= datetime.strptime(end_date, '%Y-%m-%d'))
             if min_amount is not None:
                 query = query.filter(Sale.total_amount >= min_amount)
             if max_amount is not None:
                 query = query.filter(Sale.total_amount <= max_amount)
             
-            # Order by timestamp descending
-            query = query.order_by(Sale.timestamp.desc())
+            # Order by date descending
+            query = query.order_by(Sale.date.desc())
             
             # Paginate results
             pagination = query.paginate(page=page, per_page=per_page)
             
-            return jsonify({
-                'sales': [{
+            sales_data = []
+            for sale in pagination.items:
+                # Get sale details with products
+                details = []
+                for detail in sale.details:
+                    details.append({
+                        'name': detail.product.name,
+                        'quantity': detail.quantity,
+                        'price': detail.price,
+                        'subtotal': detail.quantity * detail.price
+                    })
+                
+                sales_data.append({
                     'id': sale.id,
-                    'timestamp': sale.timestamp.isoformat(),
+                    'date': sale.date.isoformat(),
                     'total_amount': sale.total_amount,
-                    'products': sale.products,
-                    'is_invoiced': sale.is_invoiced
-                } for sale in pagination.items],
+                    'is_invoiced': sale.is_invoiced,
+                    'products': details
+                })
+
+            return jsonify({
+                'sales': sales_data,
                 'total_pages': pagination.pages,
                 'current_page': page,
                 'total_items': pagination.total
             })
             
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            app.logger.error(f"Error in get_sales: {str(e)}")
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
     @app.route('/sales/<int:sale_id>', methods=['GET'])
     def get_sale(sale_id):
         """Get a specific sale by ID"""
         try:
             sale = Sale.query.get_or_404(sale_id)
+            
+            # Get sale details with products
+            details = []
+            for detail in sale.details:
+                details.append({
+                    'name': detail.product.name,
+                    'quantity': detail.quantity,
+                    'price': detail.price,
+                    'subtotal': detail.quantity * detail.price
+                })
+            
             return jsonify({
                 'id': sale.id,
-                'timestamp': sale.timestamp.isoformat(),
+                'date': sale.date.isoformat(),
                 'total_amount': sale.total_amount,
-                'products': sale.products,
-                'is_invoiced': sale.is_invoiced
+                'amount_received': sale.amount_received,
+                'change_amount': sale.change_amount,
+                'is_invoiced': sale.is_invoiced,
+                'products': details
             })
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            app.logger.error(f"Error in get_sale: {str(e)}")
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
     @app.route('/sales/<int:sale_id>', methods=['PUT'])
     def update_sale(sale_id):
@@ -200,7 +374,7 @@ def create_app(config_name='default'):
             return jsonify({
                 'message': 'Sale updated successfully',
                 'id': sale.id,
-                'timestamp': sale.timestamp.isoformat(),
+                'date': sale.date.isoformat(),
                 'total_amount': sale.total_amount,
                 'products': sale.products,
                 'is_invoiced': sale.is_invoiced
@@ -245,9 +419,9 @@ def create_app(config_name='default'):
             
             # Apply date filters
             if start_date:
-                query = query.filter(Sale.timestamp >= datetime.strptime(start_date, '%Y-%m-%d'))
+                query = query.filter(Sale.date >= datetime.strptime(start_date, '%Y-%m-%d'))
             if end_date:
-                query = query.filter(Sale.timestamp <= datetime.strptime(end_date, '%Y-%m-%d'))
+                query = query.filter(Sale.date <= datetime.strptime(end_date, '%Y-%m-%d'))
             
             # Calculate statistics
             sales = query.all()
@@ -279,7 +453,7 @@ def create_app(config_name='default'):
                 'id': sale.id,
                 'total_amount': sale.total_amount,
                 'products': sale.products,
-                'timestamp': sale.timestamp.isoformat()
+                'date': sale.date.isoformat()
             } for sale in sales])
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -567,6 +741,228 @@ def create_app(config_name='default'):
                 'message': f'Successfully processed {len(products_created)} products',
                 'products': products_created
             }), 201
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+    # Rutas para gestión de productos
+    @app.route('/productos')
+    def productos():
+        return render_template('productos.html')
+
+    @app.route('/api/productos', methods=['GET'])
+    def get_productos():
+        try:
+            search = request.args.get('search', '').lower()
+            productos = Product.query.all()
+            
+            if search:
+                productos = [p for p in productos if search in p.name.lower() or (p.sku and search in p.sku.lower())]
+            
+            return jsonify([{
+                'id': p.id,
+                'name': p.name,
+                'price': p.price,
+                'stock': p.stock,
+                'description': p.description,
+                'sku': p.sku,
+                'image_url': p.image_url,
+                'min_stock': p.min_stock
+            } for p in productos])
+        except Exception as e:
+            app.logger.error(f"Error in get_productos: {str(e)}")
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+
+    @app.route('/api/productos', methods=['POST'])
+    def crear_producto():
+        try:
+            data = request.form
+            imagen = request.files.get('imagen')
+            
+            # Validar datos requeridos
+            if not data.get('name') or not data.get('price'):
+                return jsonify({'error': 'Nombre y precio son requeridos'}), 400
+
+            # Procesar imagen si se proporcionó
+            image_url = None
+            if imagen and allowed_file(imagen.filename):
+                filename = secure_filename(imagen.filename)
+                filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
+                imagen.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                image_url = f"/static/product_images/{filename}"
+
+            # Crear producto
+            producto = Product(
+                name=data['name'],
+                price=float(data['price']),
+                stock=int(data.get('stock', 0)),
+                description=data.get('description'),
+                sku=data.get('sku'),
+                min_stock=int(data.get('min_stock', 0)),
+                image_url=image_url
+            )
+            
+            db.session.add(producto)
+            db.session.commit()
+            
+            return jsonify({
+                'id': producto.id,
+                'name': producto.name,
+                'price': producto.price,
+                'stock': producto.stock,
+                'description': producto.description,
+                'sku': producto.sku,
+                'min_stock': producto.min_stock,
+                'image_url': producto.image_url
+            }), 201
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+
+    @app.route('/api/productos/<int:id>', methods=['PUT'])
+    def actualizar_producto(id):
+        try:
+            producto = Product.query.get_or_404(id)
+            data = request.form
+            imagen = request.files.get('imagen')
+            
+            # Actualizar campos básicos
+            if 'name' in data:
+                producto.name = data['name']
+            if 'price' in data:
+                producto.price = float(data['price'])
+            if 'stock' in data:
+                producto.stock = int(data['stock'])
+            if 'description' in data:
+                producto.description = data['description']
+            if 'sku' in data:
+                producto.sku = data['sku']
+            if 'min_stock' in data:
+                producto.min_stock = int(data['min_stock'])
+            
+            # Procesar nueva imagen si se proporcionó
+            if imagen and allowed_file(imagen.filename):
+                # Eliminar imagen anterior si existe
+                if producto.image_url:
+                    old_image_path = os.path.join(app.root_path, producto.image_url.lstrip('/'))
+                    if os.path.exists(old_image_path):
+                        os.remove(old_image_path)
+                
+                filename = secure_filename(imagen.filename)
+                filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
+                imagen.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                producto.image_url = f"/static/product_images/{filename}"
+            
+            db.session.commit()
+            
+            return jsonify({
+                'id': producto.id,
+                'name': producto.name,
+                'price': producto.price,
+                'stock': producto.stock,
+                'description': producto.description,
+                'sku': producto.sku,
+                'min_stock': producto.min_stock,
+                'image_url': producto.image_url
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+
+    @app.route('/api/productos/<int:id>', methods=['DELETE'])
+    def eliminar_producto(id):
+        try:
+            producto = Product.query.get_or_404(id)
+            
+            # Eliminar imagen si existe
+            if producto.image_url:
+                image_path = os.path.join(app.root_path, producto.image_url.lstrip('/'))
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+            
+            db.session.delete(producto)
+            db.session.commit()
+            
+            return '', 204
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+
+    # Rutas del carrito
+    @app.route('/api/cart/add', methods=['POST'])
+    def add_to_cart():
+        data = request.get_json()
+        product_id = data.get('product_id')
+        quantity = data.get('quantity', 1)
+        
+        product = Product.query.get_or_404(product_id)
+        
+        if quantity > product.stock:
+            return jsonify({'error': 'No hay suficiente stock'}), 400
+        
+        if quantity < 1:
+            return jsonify({'error': 'La cantidad debe ser mayor a 0'}), 400
+        
+        return jsonify({
+            'id': product.id,
+            'name': product.name,
+            'price': product.price,
+            'quantity': quantity,
+            'subtotal': product.price * quantity
+        })
+
+    @app.route('/api/cart/remove/<int:product_id>', methods=['DELETE'])
+    def remove_from_cart(product_id):
+        return jsonify({'message': 'Producto eliminado del carrito'})
+
+    @app.route('/api/ventas/finalizar', methods=['POST'])
+    def finalizar_venta():
+        try:
+            data = request.get_json()
+            items = data.get('items', [])
+            
+            if not items:
+                return jsonify({'error': 'El carrito está vacío'}), 400
+                
+            # Crear la venta
+            venta = Sale(
+                date=datetime.now(),
+                total_amount=sum(item['price'] * item['quantity'] for item in items)
+            )
+            db.session.add(venta)
+            
+            # Actualizar el stock y crear los detalles de la venta
+            for item in items:
+                producto = Product.query.get(item['id'])
+                if not producto:
+                    return jsonify({'error': f'Producto {item["id"]} no encontrado'}), 404
+                    
+                if producto.stock < item['quantity']:
+                    return jsonify({'error': f'Stock insuficiente para {producto.name}'}), 400
+                    
+                # Actualizar stock
+                producto.stock -= item['quantity']
+                
+                # Crear detalle de venta
+                detalle = SaleDetail(
+                    sale=venta,
+                    product=producto,
+                    quantity=item['quantity'],
+                    price=item['price']
+                )
+                db.session.add(detalle)
+            
+            db.session.commit()
+            
+            return jsonify({
+                'message': 'Venta finalizada con éxito',
+                'venta_id': venta.id,
+                'total': venta.total_amount
+            })
             
         except Exception as e:
             db.session.rollback()

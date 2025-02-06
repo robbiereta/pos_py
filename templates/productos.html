@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <style>
+        .product-image {
+            height: 200px;
+            object-fit: cover;
+        }
+        .low-stock {
+            background-color: #fff3cd;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">POS System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Ventas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/productos">Productos</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Gestión de Productos</h1>
+                <button class="btn btn-primary" onclick="showProductModal()">
+                    <i class="fas fa-plus"></i> Nuevo Producto
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtros y búsqueda -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Buscar productos...">
+                    <button class="btn btn-outline-secondary" type="button" onclick="filterProducts()">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="stockFilter">
+                    <option value="all">Todos los productos</option>
+                    <option value="low">Stock bajo</option>
+                    <option value="out">Sin stock</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="sortBy">
+                    <option value="name">Ordenar por nombre</option>
+                    <option value="price">Ordenar por precio</option>
+                    <option value="stock">Ordenar por stock</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Lista de productos -->
+        <div class="row" id="productList">
+            <!-- Los productos se cargarán aquí dinámicamente -->
+        </div>
+
+        <!-- Modal para crear/editar producto -->
+        <div class="modal fade" id="productModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productModalLabel">Nuevo Producto</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="productForm" enctype="multipart/form-data">
+                            <input type="hidden" id="productId">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nombre*</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Precio*</label>
+                                <input type="number" class="form-control" id="price" step="0.01" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="stock" class="form-label">Stock</label>
+                                <input type="number" class="form-control" id="stock" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="min_stock" class="form-label">Stock Mínimo</label>
+                                <input type="number" class="form-control" id="min_stock" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="sku" class="form-label">SKU</label>
+                                <input type="text" class="form-control" id="sku">
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="description"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="imagen" class="form-label">Imagen</label>
+                                <input type="file" class="form-control" id="imagen" accept="image/*">
+                            </div>
+                            <div id="currentImage" class="mb-3" style="display: none;">
+                                <label class="form-label">Imagen Actual</label>
+                                <img src="" alt="Imagen actual" class="img-fluid">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="saveProduct()">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variables globales
+        let products = [];
+        const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+
+        // Cargar productos al iniciar
+        window.onload = loadProducts;
+
+        // Función para cargar productos
+        function loadProducts() {
+            fetch('/api/productos')
+                .then(response => response.json())
+                .then(data => {
+                    products = data;
+                    displayProducts();
+                })
+                .catch(error => alert('Error al cargar productos: ' + error));
+        }
+
+        // Función para mostrar productos
+        function displayProducts(filteredProducts = null) {
+            const productsToShow = filteredProducts || products;
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+            
+            productsToShow.forEach(product => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 mb-4';
+                
+                // Verificar si el stock está bajo
+                const isLowStock = product.stock <= product.min_stock;
+                
+                col.innerHTML = `
+                    <div class="card ${isLowStock ? 'low-stock' : ''}">
+                        <img src="${product.image_url || '/static/placeholder.png'}" 
+                             class="card-img-top product-image" 
+                             alt="${product.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text">
+                                <strong>Precio:</strong> $${product.price.toFixed(2)}<br>
+                                <strong>Stock:</strong> ${product.stock} ${isLowStock ? '(¡Stock Bajo!)' : ''}<br>
+                                <strong>SKU:</strong> ${product.sku || 'N/A'}<br>
+                                <small>${product.description || ''}</small>
+                            </p>
+                            <div class="btn-group">
+                                <button class="btn btn-primary btn-sm" onclick="editProduct(${product.id})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id})">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                productList.appendChild(col);
+            });
+        }
+
+        // Función para mostrar modal de nuevo producto
+        function showProductModal() {
+            document.getElementById('productId').value = '';
+            document.getElementById('productForm').reset();
+            document.getElementById('productModalLabel').textContent = 'Nuevo Producto';
+            document.getElementById('currentImage').style.display = 'none';
+            productModal.show();
+        }
+
+        // Función para editar producto
+        function editProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (product) {
+                document.getElementById('productId').value = product.id;
+                document.getElementById('name').value = product.name;
+                document.getElementById('price').value = product.price;
+                document.getElementById('stock').value = product.stock;
+                document.getElementById('min_stock').value = product.min_stock;
+                document.getElementById('sku').value = product.sku || '';
+                document.getElementById('description').value = product.description || '';
+                
+                // Mostrar imagen actual si existe
+                if (product.image_url) {
+                    document.getElementById('currentImage').style.display = 'block';
+                    document.getElementById('currentImage').querySelector('img').src = product.image_url;
+                } else {
+                    document.getElementById('currentImage').style.display = 'none';
+                }
+                
+                document.getElementById('productModalLabel').textContent = 'Editar Producto';
+                productModal.show();
+            }
+        }
+
+        // Función para guardar producto
+        function saveProduct() {
+            const formData = new FormData();
+            const productId = document.getElementById('productId').value;
+            
+            // Agregar campos al formData
+            formData.append('name', document.getElementById('name').value);
+            formData.append('price', document.getElementById('price').value);
+            formData.append('stock', document.getElementById('stock').value);
+            formData.append('min_stock', document.getElementById('min_stock').value);
+            formData.append('sku', document.getElementById('sku').value);
+            formData.append('description', document.getElementById('description').value);
+            
+            const imageFile = document.getElementById('imagen').files[0];
+            if (imageFile) {
+                formData.append('imagen', imageFile);
+            }
+
+            // Determinar si es crear o actualizar
+            const method = productId ? 'PUT' : 'POST';
+            const url = productId ? `/api/productos/${productId}` : '/api/productos';
+
+            fetch(url, {
+                method: method,
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al guardar el producto');
+                }
+                return response.json();
+            })
+            .then(() => {
+                productModal.hide();
+                loadProducts();
+            })
+            .catch(error => alert(error.message));
+        }
+
+        // Función para eliminar producto
+        function deleteProduct(id) {
+            if (confirm('¿Está seguro de que desea eliminar este producto?')) {
+                fetch(`/api/productos/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al eliminar el producto');
+                    }
+                    loadProducts();
+                })
+                .catch(error => alert(error.message));
+            }
+        }
+
+        // Función para filtrar productos
+        function filterProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const stockFilter = document.getElementById('stockFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+            
+            let filtered = products.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
+                                    (product.sku && product.sku.toLowerCase().includes(searchTerm)) ||
+                                    (product.description && product.description.toLowerCase().includes(searchTerm));
+                
+                if (stockFilter === 'low') {
+                    return matchesSearch && product.stock <= product.min_stock && product.stock > 0;
+                } else if (stockFilter === 'out') {
+                    return matchesSearch && product.stock === 0;
+                }
+                return matchesSearch;
+            });
+            
+            // Ordenar productos
+            filtered.sort((a, b) => {
+                switch (sortBy) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'price':
+                        return a.price - b.price;
+                    case 'stock':
+                        return a.stock - b.stock;
+                    default:
+                        return 0;
+                }
+            });
+            
+            displayProducts(filtered);
+        }
+
+        // Agregar event listeners para filtros
+        document.getElementById('searchInput').addEventListener('input', filterProducts);
+        document.getElementById('stockFilter').addEventListener('change', filterProducts);
+        document.getElementById('sortBy').addEventListener('change', filterProducts);
+    </script>
+</body>
+</html>

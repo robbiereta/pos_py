@@ -11,8 +11,8 @@ load_dotenv()
 class CFDIGenerator:
     def __init__(self, test_mode=False):
         self.test_mode = test_mode
-        self.url = os.getenv('SW_URL', 'http://services.test.sw.com.mx')
-        self.token = os.getenv('SW_TOKEN')
+        self.url = 'https://services.sw.com.mx' if not test_mode else os.getenv('SW_URL', 'http://services.test.sw.com.mx')
+        self.token = os.getenv('SW_TOKEN_P') if not test_mode else os.getenv('SW_TOKEN')
         self.headers = {
             'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/jsontoxml'

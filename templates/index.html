@@ -5,6 +5,7 @@
     <title>POS con Facturación CFDI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
 </head>
 <body>
     <div class="container mt-5">
@@ -21,6 +22,9 @@
             <li class="nav-item">
                 <a class="nav-link" id="global-invoice-tab" data-bs-toggle="tab" href="#global-invoice" role="tab">Factura Global</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="product-tab" data-bs-toggle="tab" href="#product" role="tab">Gestión de Productos</a>
+            </li>
         </ul>
 
         <!-- Tab Content -->
@@ -29,46 +33,50 @@
             <div class="tab-pane fade show active" id="pos" role="tabpanel">
                 <div class="row mb-4">
                     <div class="col-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Importar Ventas desde Excel</h5>
-                                <form id="uploadForm" enctype="multipart/form-data">
-                                    <div class="input-group">
-                                        <input type="file" class="form-control" id="salesFile" accept=".xlsx" required>
-                                        <button class="btn btn-primary" type="submit">Importar Ventas</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+                      
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <h2>Productos</h2>
-                        <div class="card mb-3">
+                        <h2>Selección de Productos</h2>
+                        <div class="card mb-4">
                             <div class="card-body">
-                                <h5 class="card-title">Importar Productos desde Excel</h5>
-                                <form id="uploadProductsForm" enctype="multipart/form-data">
+                                <div class="mb-3">
                                     <div class="input-group">
-                                        <input type="file" class="form-control" id="productsFile" accept=".xlsx" required>
-                                        <button class="btn btn-primary" type="submit">Importar Productos</button>
+                                        <input type="text" class="form-control" id="productSearch" placeholder="Buscar producto por nombre o SKU...">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="searchProducts()">
+                                            <i class="fas fa-search"></i>
+                                        </button>
                                     </div>
-                                    <small class="text-muted">El archivo Excel debe tener las columnas: name, price, stock (opcional)</small>
-                                </form>
+                                </div>
+                                <div id="productResults" class="list-group" style="max-height: 300px; overflow-y: auto;">
+                                    <!-- Los resultados de búsqueda aparecerán aquí -->
+                                </div>
                             </div>
                         </div>
-                        <table id="productTable" class="table">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Precio</th>
-                                    <th>Stock</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productList"></tbody>
-                        </table>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">Agregar Producto</button>
+
+                        <!-- Producto seleccionado -->
+                        <div class="card mb-4" id="selectedProductCard" style="display: none;">
+                            <div class="card-body">
+                                <h5 class="card-title" id="selectedProductName"></h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <img id="selectedProductImage" src="" alt="Producto" class="img-fluid mb-2" style="max-height: 100px; object-fit: contain;">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <p class="mb-1">Precio: $<span id="selectedProductPrice"></span></p>
+                                        <p class="mb-1">Stock: <span id="selectedProductStock"></span></p>
+                                        <div class="input-group mb-2">
+                                            <span class="input-group-text">Cantidad</span>
+                                            <input type="number" class="form-control" id="selectedProductQuantity" value="1" min="1">
+                                        </div>
+                                        <button class="btn btn-primary" onclick="addToCart()">
+                                            <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <h2>Carrito de Compra</h2>
@@ -80,18 +88,46 @@
                                     <th>Precio</th>
                                 </tr>
                             </thead>
-                            <tbody id="cartList"></tbody>
+                            <tbody id="cartTableBody"></tbody>
                         </table>
                         <div class="card">
                             <div class="card-body">
-                                <h5>Total: $<span id="totalAmount">0.00</span></h5>
+                                <h5>Total: $<span id="total">0.00</span></h5>
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" id="generateInvoice">
                                     <label class="form-check-label" for="generateInvoice">
-                                        Generar Factura Individual
+                                        Generar Factura
                                     </label>
                                 </div>
-                                <button id="checkoutBtn" class="btn btn-success">Finalizar Venta</button>
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Pago</h5>
+                                        <div class="mb-3">
+                                            <label class="form-label">Total a Pagar</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="text" class="form-control" id="totalAmount" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Cantidad Recibida</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" class="form-control" id="amountReceived" step="0.01" min="0" onchange="calculateChange()">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Cambio</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="text" class="form-control" id="changeAmount" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-success btn-lg w-100" onclick="finalizarVenta()" id="finalizarVentaBtn" disabled>
+                                    <i class="fas fa-check-circle"></i> Finalizar Venta
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -177,18 +213,19 @@
                             <div class="card-body">
                                 <h5 class="card-title">Lista de Ventas</h5>
                                 <div class="table-responsive">
-                                    <table class="table table-striped">
+                                    <table class="table" id="salesTable">
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
                                                 <th>Fecha</th>
-                                                <th>Monto</th>
-                                                <th>Productos</th>
+                                                <th>Total</th>
                                                 <th>Estado</th>
                                                 <th>Acciones</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="salesList"></tbody>
+                                        <tbody id="salesList">
+                                            <!-- Las ventas se cargarán dinámicamente aquí -->
+                                        </tbody>
                                     </table>
                                 </div>
                                 <!-- Pagination -->
@@ -199,6 +236,9 @@
                         </div>
                     </div>
                 </div>
+                <button class="btn btn-primary btn-lg w-100 mt-2" onclick="printThermalReceipt(window.lastSaleData, window.lastSaleItems)" id="reprintBtn" style="display: none;">
+                    <i class="fas fa-print"></i> Reimprimir Último Ticket
+                </button>
             </div>
 
             <!-- Global Invoice Tab -->
@@ -286,6 +326,74 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container mt-4" id="productManagement">
+                    <div class="row mb-4">
+                        <div class="col">
+                            <h2>Gestión de Productos</h2>
+                            <button class="btn btn-primary" onclick="showProductForm()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Productos -->
+                    <div class="row" id="productList">
+                        <!-- Los productos se cargarán aquí dinámicamente -->
+                    </div>
+
+                    <!-- Modal para Agregar/Editar Producto -->
+                    <div class="modal fade" id="productModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="productModalLabel">Nuevo Producto</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="productForm" enctype="multipart/form-data">
+                                        <input type="hidden" id="productId">
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Nombre*</label>
+                                            <input type="text" class="form-control" id="name" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="price" class="form-label">Precio*</label>
+                                            <input type="number" class="form-control" id="price" step="0.01" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="stock" class="form-label">Stock</label>
+                                            <input type="number" class="form-control" id="stock" value="0">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="min_stock" class="form-label">Stock Mínimo</label>
+                                            <input type="number" class="form-control" id="min_stock" value="0">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="sku" class="form-label">SKU</label>
+                                            <input type="text" class="form-control" id="sku">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">Descripción</label>
+                                            <textarea class="form-control" id="description"></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="image" class="form-label">Imagen</label>
+                                            <input type="file" class="form-control" id="image" accept="image/*">
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="btn btn-primary" onclick="saveProduct()">Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -349,123 +457,622 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/pos.js"></script>
-    <script src="/static/sales.js"></script>
     <script>
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const fileInput = document.getElementById('salesFile');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('Por favor selecciona un archivo Excel');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-                const response = await fetch('/upload-sales', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    alert(data.message);
-                    location.reload(); // Recargar la página para mostrar las nuevas ventas
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            } catch (error) {
-                alert('Error al subir el archivo: ' + error);
-            }
-        });
+        // Variables globales para acceso desde HTML
+        let selectedProduct = null;
+        let products = [];
+        let cart = [];
+        let saleData = {};
+        window.lastSaleData = null;
+        window.lastSaleItems = null;
 
-        // Add event listener for products upload
-        document.getElementById('uploadProductsForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const fileInput = document.getElementById('productsFile');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('Por favor selecciona un archivo Excel');
-                return;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Función para cargar productos
+            function loadProducts() {
+                console.log('Cargando productos...');
+                fetch('/api/productos')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Productos cargados:', data);
+                        products = data;
+                        // Realizar búsqueda inicial si hay texto en el campo
+                        const searchInput = document.getElementById('productSearch');
+                        if (searchInput && searchInput.value) {
+                            searchProducts();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error cargando productos:', error);
+                    });
             }
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-                const response = await fetch('/upload-products', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    alert(data.message);
-                    location.reload(); // Reload page to show new products
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            } catch (error) {
-                alert('Error al subir el archivo: ' + error);
-            }
-        });
 
-        // Función para cargar facturas globales
-        async function loadGlobalInvoices() {
-            try {
-                const response = await fetch('/api/global_invoices');
-                const invoices = await response.json();
+            // Función para buscar productos
+            function searchProducts() {
+                const searchInput = document.getElementById('productSearch');
+                const resultsDiv = document.getElementById('productResults');
                 
-                const tbody = document.getElementById('globalInvoicesList');
+                if (!searchInput || !resultsDiv) {
+                    console.error('Elementos de búsqueda no encontrados');
+                    return;
+                }
+
+                const searchTerm = searchInput.value.toLowerCase();
+                resultsDiv.innerHTML = '';
+                console.log('Término de búsqueda:', searchTerm);
+
+                // Si el término de búsqueda está vacío, limpiar resultados
+                if (!searchTerm.trim()) {
+                    resultsDiv.innerHTML = '';
+                    return;
+                }
+
+                const filteredProducts = products.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm) || 
+                    (product.sku && product.sku.toLowerCase().includes(searchTerm))
+                );
+                console.log('Productos filtrados:', filteredProducts);
+
+                if (filteredProducts.length === 0) {
+                    resultsDiv.innerHTML = '<div class="list-group-item">No se encontraron productos</div>';
+                    return;
+                }
+
+                filteredProducts.forEach(product => {
+                    const item = document.createElement('a');
+                    item.href = '#';
+                    item.className = 'list-group-item list-group-item-action';
+                    item.innerHTML = `
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${product.name}</h6>
+                                <small>SKU: ${product.sku || 'N/A'}</small>
+                            </div>
+                            <div class="text-end">
+                                <div>$${product.price.toFixed(2)}</div>
+                                <small class="text-muted">Stock: ${product.stock}</small>
+                            </div>
+                        </div>
+                    `;
+                    item.onclick = (e) => {
+                        e.preventDefault();
+                        selectProduct(product);
+                    };
+                    resultsDiv.appendChild(item);
+                });
+            }
+
+            // Event listener para búsqueda en tiempo real con debounce
+            const searchInput = document.getElementById('productSearch');
+            if (searchInput) {
+                let searchTimeout;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(searchProducts, 300);
+                });
+            }
+
+            // Función para seleccionar un producto
+            window.selectProduct = function(product) {
+                selectedProduct = product;
+                const card = document.getElementById('selectedProductCard');
+                if (!card) {
+                    console.error('Elemento selectedProductCard no encontrado');
+                    return;
+                }
+                
+                card.style.display = 'block';
+                document.getElementById('selectedProductName').textContent = product.name;
+                document.getElementById('selectedProductPrice').textContent = product.price.toFixed(2);
+                document.getElementById('selectedProductStock').textContent = product.stock;
+                document.getElementById('selectedProductImage').src = product.image_url || '/static/placeholder.png';
+                document.getElementById('selectedProductQuantity').value = 1;
+                document.getElementById('selectedProductQuantity').max = product.stock;
+            }
+
+            // Función para actualizar la tabla del carrito
+            window.updateCartTable = function() {
+                const tbody = document.getElementById('cartTableBody');
+                if (!tbody) {
+                    console.error('Elemento cartTableBody no encontrado');
+                    return;
+                }
+
                 tbody.innerHTML = '';
-                
-                invoices.forEach(invoice => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${invoice.date}</td>
-                        <td>G-${invoice.folio}</td>
-                        <td>${invoice.cfdi_uuid}</td>
-                        <td>$${invoice.total_amount.toFixed(2)}</td>
+                cart.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>$${item.price.toFixed(2)}</td>
+                        <td>${item.quantity}</td>
+                        <td>$${(item.price * item.quantity).toFixed(2)}</td>
                         <td>
-                            <a href="/download_global_xml/${invoice.cfdi_uuid}" class="btn btn-primary btn-sm">
-                                <i class="bi bi-file-code"></i> XML Local
-                            </a>
-                            <a href="/download_global_xml_from_pac/${invoice.cfdi_uuid}" class="btn btn-info btn-sm">
-                                <i class="bi bi-cloud-download"></i> XML PAC
-                            </a>
-                            <a href="/download_global_pdf/${invoice.cfdi_uuid}" class="btn btn-danger btn-sm">
-                                <i class="bi bi-file-pdf"></i> PDF
-                            </a>
+                            <button class="btn btn-danger btn-sm" onclick="removeFromCart(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                     `;
-                    tbody.appendChild(row);
+                    tbody.appendChild(tr);
                 });
-            } catch (error) {
-                console.error('Error loading global invoices:', error);
             }
-        }
 
-        // Cargar facturas globales al cambiar a la pestaña
-        document.getElementById('global-invoice-tab').addEventListener('shown.bs.tab', loadGlobalInvoices);
-
-        // Función para descargar XML
-        async function downloadXML(uuid) {
-            try {
-                window.location.href = `/api/global_invoices/${uuid}/xml`;
-            } catch (error) {
-                console.error('Error downloading XML:', error);
-                alert('Error al descargar el XML');
+            // Función para actualizar el total
+            window.updateTotal = function() {
+                const totalElement = document.getElementById('total');
+                if (!totalElement) {
+                    console.error('Elemento total no encontrado');
+                    return;
+                }
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                totalElement.textContent = total.toFixed(2);
+                document.getElementById('totalAmount').value = total.toFixed(2);
             }
-        }
+
+            // Función para agregar al carrito (global)
+            window.addToCart = function() {
+                if (!selectedProduct) {
+                    console.error('No hay producto seleccionado');
+                    return;
+                }
+
+                const quantityInput = document.getElementById('selectedProductQuantity');
+                if (!quantityInput) {
+                    console.error('Elemento selectedProductQuantity no encontrado');
+                    return;
+                }
+
+                const quantity = parseInt(quantityInput.value);
+                if (quantity < 1 || quantity > selectedProduct.stock) {
+                    alert('Cantidad inválida');
+                    return;
+                }
+
+                // Verificar si el producto ya está en el carrito
+                const existingItem = cart.find(item => item.id === selectedProduct.id);
+                if (existingItem) {
+                    const newQuantity = existingItem.quantity + quantity;
+                    if (newQuantity > selectedProduct.stock) {
+                        alert('No hay suficiente stock');
+                        return;
+                    }
+                    existingItem.quantity = newQuantity;
+                } else {
+                    cart.push({
+                        id: selectedProduct.id,
+                        name: selectedProduct.name,
+                        price: selectedProduct.price,
+                        quantity: quantity
+                    });
+                }
+
+                updateCartTable();
+                updateTotal();
+
+                // Limpiar selección
+                const card = document.getElementById('selectedProductCard');
+                if (card) {
+                    card.style.display = 'none';
+                }
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+                const resultsDiv = document.getElementById('productResults');
+                if (resultsDiv) {
+                    resultsDiv.innerHTML = '';
+                }
+            }
+
+            // Función para eliminar del carrito (global)
+            window.removeFromCart = function(index) {
+                cart.splice(index, 1);
+                updateCartTable();
+                updateTotal();
+            }
+
+            // Función para finalizar venta (global)
+            window.finalizarVenta = function() {
+                if (cart.length === 0) {
+                    alert('El carrito está vacío');
+                    return;
+                }
+
+                const amountReceived = parseFloat(document.getElementById('amountReceived').value);
+                const totalAmount = parseFloat(document.getElementById('totalAmount').value);
+                const changeAmount = amountReceived - totalAmount;
+
+                if (changeAmount < 0) {
+                    alert('La cantidad recibida es menor que el total');
+                    return;
+                }
+
+                const generateInvoice = document.getElementById('generateInvoice').checked;
+                const saleData = {
+                    total_amount: totalAmount,
+                    amount_received: amountReceived,
+                    change_amount: changeAmount,
+                    products: cart.map(item => ({
+                        product_id: item.id,
+                        quantity: item.quantity,
+                        price: item.price
+                    })),
+                    generate_invoice: generateInvoice
+                };
+
+                fetch('/sales', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(saleData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    // Guardar datos de la venta para impresión
+                    window.lastSaleData = {
+                        id: data.id,
+                        total_amount: totalAmount,
+                        amount_received: amountReceived,
+                        change_amount: changeAmount
+                    };
+                    window.lastSaleItems = [...cart];
+
+                    // Imprimir ticket automáticamente
+                    printThermalReceipt(window.lastSaleData, window.lastSaleItems);
+
+                    // Limpiar el carrito y formulario
+                    cart = [];
+                    updateCartTable();
+                    document.getElementById('amountReceived').value = '';
+                    document.getElementById('changeAmount').value = '';
+                    document.getElementById('finalizarVentaBtn').disabled = true;
+                    
+                    if (generateInvoice && data.cfdi_invoice) {
+                        alert('Factura generada exitosamente');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error finalizando venta:', error);
+                    alert('Error al finalizar la venta: ' + error.message);
+                });
+            }
+
+            // Función para calcular el cambio
+            window.calculateChange = function() {
+                const amountReceived = parseFloat(document.getElementById('amountReceived').value);
+                const totalAmount = parseFloat(document.getElementById('totalAmount').value);
+                const changeAmount = amountReceived - totalAmount;
+                document.getElementById('changeAmount').value = changeAmount.toFixed(2);
+                if (changeAmount >= 0) {
+                    document.getElementById('finalizarVentaBtn').disabled = false;
+                } else {
+                    document.getElementById('finalizarVentaBtn').disabled = true;
+                }
+            }
+
+            // Función para formatear el ticket para impresora térmica 80mm
+            function formatTicket(saleData, items) {
+                const width = 42; // Ancho de papel 80mm ~ 42 caracteres
+                const separator = '='.repeat(width);
+                const now = new Date();
+                
+                // Función para centrar texto
+                const center = (text) => {
+                    const spaces = Math.max(0, Math.floor((width - text.length) / 2));
+                    return ' '.repeat(spaces) + text;
+                };
+                
+                // Función para alinear texto a la derecha
+                const right = (text) => {
+                    const spaces = Math.max(0, width - text.length);
+                    return ' '.repeat(spaces) + text;
+                };
+                
+                // Función para formatear precio
+                const formatPrice = (price) => `$${price.toFixed(2)}`;
+                
+                // Encabezado
+                let ticket = [
+                    separator,
+                    center('MI TIENDA'),
+                    center('Ticket de Venta'),
+                    separator,
+                    `Fecha: ${now.toLocaleDateString()}`,
+                    `Hora: ${now.toLocaleTimeString()}`,
+                    `Folio: ${String(saleData.id).padStart(8, '0')}`,
+                    separator,
+                    'PRODUCTO                 CANT   PRECIO   TOTAL',
+                    separator
+                ];
+                
+                // Productos
+                items.forEach(item => {
+                    const name = item.name.substring(0, 20).padEnd(20);
+                    const qty = String(item.quantity).padStart(4);
+                    const price = formatPrice(item.price).padStart(8);
+                    const total = formatPrice(item.price * item.quantity).padStart(8);
+                    ticket.push(`${name} ${qty} ${price} ${total}`);
+                });
+                
+                // Totales
+                ticket = ticket.concat([
+                    separator,
+                    right(`TOTAL: ${formatPrice(saleData.total_amount)}`),
+                    right(`RECIBIDO: ${formatPrice(saleData.amount_received)}`),
+                    right(`CAMBIO: ${formatPrice(saleData.change_amount)}`),
+                    separator,
+                    center('¡GRACIAS POR SU COMPRA!'),
+                    center('Conserve su ticket'),
+                    separator,
+                    '\n\n\n' // Espacio para corte
+                ]);
+                
+                return ticket.join('\n');
+            }
+
+            // Función para imprimir en impresora térmica
+            async function printThermalReceipt(saleData, items) {
+                if (!saleData || !items) {
+                    alert('No hay datos de venta para imprimir');
+                    return;
+                }
+
+                const ticket = formatTicket(saleData, items);
+                
+                try {
+                    const printWindow = window.open('', 'PRINT', 'height=600,width=800');
+                    
+                    printWindow.document.write(`
+                        <html>
+                        <head>
+                            <title>Ticket de Venta</title>
+                            <style>
+                                @page {
+                                    size: 80mm auto;
+                                    margin: 0;
+                                }
+                                body {
+                                    font-family: 'Courier New', monospace;
+                                    font-size: 10pt;
+                                    width: 80mm;
+                                    margin: 0;
+                                    padding: 3mm;
+                                }
+                                pre {
+                                    margin: 0;
+                                    white-space: pre;
+                                    font-family: 'Courier New', monospace;
+                                }
+                                @media print {
+                                    html, body {
+                                        width: 80mm;
+                                        height: auto;
+                                    }
+                                    pre {
+                                        white-space: pre-wrap;
+                                    }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <pre>${ticket}</pre>
+                        </body>
+                        </html>
+                    `);
+                    
+                    printWindow.document.close();
+                    printWindow.focus();
+                    
+                    // Esperar a que los estilos se carguen
+                    setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                    }, 250);
+                } catch (error) {
+                    console.error('Error al imprimir:', error);
+                    alert('Error al imprimir el ticket. Por favor, inténtelo de nuevo.');
+                }
+            }
+
+            // Mostrar/ocultar botón de reimpresión
+            function updateReprintButton() {
+                const reprintBtn = document.getElementById('reprintBtn');
+                if (window.lastSaleData && window.lastSaleItems) {
+                    reprintBtn.style.display = 'block';
+                } else {
+                    reprintBtn.style.display = 'none';
+                }
+            }
+
+            // Actualizar visibilidad inicial del botón
+            updateReprintButton();
+
+            // Función para cargar ventas
+            function loadSales(filters = {}) {
+                let url = '/sales?';
+                
+                // Agregar filtros a la URL
+                if (filters.startDate) url += `&start_date=${filters.startDate}`;
+                if (filters.endDate) url += `&end_date=${filters.endDate}`;
+                if (filters.minAmount) url += `&min_amount=${filters.minAmount}`;
+                if (filters.maxAmount) url += `&max_amount=${filters.maxAmount}`;
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        const tbody = document.querySelector('#salesTable tbody');
+                        tbody.innerHTML = '';
+                        
+                        data.sales.forEach(sale => {
+                            const row = document.createElement('tr');
+                            const date = new Date(sale.date);
+                            row.innerHTML = `
+                                <td>${sale.id}</td>
+                                <td>${date.toLocaleString()}</td>
+                                <td>$${sale.total_amount.toFixed(2)}</td>
+                                <td>${sale.is_invoiced ? '<span class="badge bg-success">Facturado</span>' : '<span class="badge bg-warning">Pendiente</span>'}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="viewSaleDetails(${sale.id})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-primary" onclick="reprintSale(${sale.id})">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                    ${!sale.is_invoiced ? `
+                                        <button class="btn btn-sm btn-success" onclick="generateInvoice(${sale.id})">
+                                            <i class="fas fa-file-invoice"></i>
+                                        </button>
+                                    ` : ''}
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error cargando ventas:', error);
+                        alert('Error cargando ventas');
+                    });
+            }
+
+            // Event listener para el formulario de filtros
+            document.getElementById('salesFilterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const filters = {
+                    startDate: document.getElementById('startDate').value,
+                    endDate: document.getElementById('endDate').value,
+                    minAmount: document.getElementById('minAmount').value,
+                    maxAmount: document.getElementById('maxAmount').value
+                };
+                loadSales(filters);
+            });
+
+            // Función para ver detalles de una venta
+            function viewSaleDetails(saleId) {
+                fetch(`/sales/${saleId}`)
+                    .then(response => response.json())
+                    .then(sale => {
+                        // Aquí puedes mostrar los detalles en un modal
+                        const productsHtml = sale.products.map(product => `
+                            <tr>
+                                <td>${product.name}</td>
+                                <td>${product.quantity}</td>
+                                <td>$${product.price.toFixed(2)}</td>
+                                <td>$${(product.quantity * product.price).toFixed(2)}</td>
+                            </tr>
+                        `).join('');
+
+                        const modal = new bootstrap.Modal(document.getElementById('saleDetailsModal'));
+                        document.getElementById('saleDetailsBody').innerHTML = `
+                            <h5>Venta #${sale.id}</h5>
+                            <p>Fecha: ${new Date(sale.date).toLocaleString()}</p>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${productsHtml}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="3">Total:</th>
+                                        <th>$${sale.total_amount.toFixed(2)}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        `;
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error cargando detalles de la venta:', error);
+                        alert('Error cargando detalles de la venta. Por favor, intente nuevamente.');
+                    });
+            }
+
+            // Función para generar factura
+            function generateInvoice(saleId) {
+                fetch(`/sales/${saleId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        generate_invoice: true
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    alert('Factura generada exitosamente');
+                    loadSales(); // Recargar la lista de ventas
+                })
+                .catch(error => {
+                    console.error('Error generando factura:', error);
+                    alert('Error al generar la factura. Por favor, intente nuevamente.');
+                });
+            }
+
+            // Función para reimprimir una venta específica
+            async function reprintSale(saleId) {
+                try {
+                    const response = await fetch(`/sales/${saleId}`);
+                    const saleData = await response.json();
+                    
+                    if (saleData.error) {
+                        throw new Error(saleData.error);
+                    }
+                    
+                    // Formatear los datos para la impresión
+                    const printData = {
+                        id: saleData.id,
+                        date: new Date(saleData.date),
+                        total_amount: saleData.total_amount,
+                        amount_received: saleData.amount_received,
+                        change_amount: saleData.change_amount
+                    };
+                    
+                    // Imprimir el ticket
+                    printThermalReceipt(printData, saleData.products);
+                } catch (error) {
+                    console.error('Error al reimprimir:', error);
+                    alert('Error al reimprimir el ticket');
+                }
+            }
+
+            // Cargar ventas al iniciar
+            document.getElementById('sales-tab').addEventListener('shown.bs.tab', function (e) {
+                loadSales();
+            });
+
+            // Iniciar carga de productos
+            loadProducts();
+        });
     </script>
+
+    <!-- Sale Details Modal -->
+    <div class="modal fade" id="saleDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalles de la Venta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="saleDetailsBody">
+                    <!-- Content will be dynamically inserted here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
