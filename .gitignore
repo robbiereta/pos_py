@@ -1,0 +1,4 @@
+__pycache__
+pos.db
+.env
+.env.staging
