@@ -8,11 +8,8 @@ NC='\033[0m'
 echo -e "${GREEN}Iniciando despliegue de la aplicación...${NC}"
 
 # Verificar si Python 3 está instalado
-if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}Python 3 no está instalado. Instalando...${NC}"
-    sudo apt-get update
+ sudo apt-get update
     sudo apt-get install -y python3 python3-pip python3-venv
-fi
 
 # Verificar si nginx está instalado
 if ! command -v nginx &> /dev/null; then
@@ -32,7 +29,7 @@ source venv/bin/activate
 
 # Instalar dependencias
 echo -e "${GREEN}Instalando dependencias...${NC}"
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 # Configurar nginx
 echo -e "${GREEN}Configurando nginx...${NC}"

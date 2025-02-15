@@ -42,7 +42,7 @@ class Client(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationship with sales
-    sales = db.relationship('Sale', backref='client', lazy=True)
+    sales = db.relationship('Sale', back_populates='client', lazy=True)
     
     def to_dict(self):
         return {
@@ -73,9 +73,9 @@ class Sale(db.Model):
     global_invoice_id = db.Column(db.Integer, db.ForeignKey('global_invoice.id'), nullable=True)
     
     # Relationships
-    details = db.relationship('SaleDetail', backref='sale', lazy=True)
+    details = db.relationship('SaleDetail', back_populates='sale', lazy=True)
     global_invoice = db.relationship('GlobalInvoice', back_populates='sales')
-    client = db.relationship('Client', backref='sales', lazy=True)
+    client = db.relationship('Client', back_populates='sales', lazy=True)
 
     def to_dict(self):
         return {
@@ -99,8 +99,8 @@ class SaleDetail(db.Model):
     price = db.Column(db.Float, nullable=False)
     
     # Relationship with Product
-    sale = db.relationship('Sale', backref=db.backref('details', lazy=True))
-    product = db.relationship('Product')
+    product = db.relationship('Product', backref='sale_details', lazy=True)
+    sale = db.relationship('Sale', back_populates='details', lazy=True)
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

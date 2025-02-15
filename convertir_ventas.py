@@ -8,8 +8,8 @@ def convertir_ventas(archivo_origen, archivo_destino):
         # Leer el archivo de ventas original
         df = pd.read_excel(archivo_origen)
         
-        # Obtener las fechas de la segunda fila
-        fechas = df.iloc[1]
+        # Obtener las fechas de la primera fila
+        fechas = df.iloc[0]
         
         # Lista para almacenar todas las ventas
         ventas = []
@@ -21,11 +21,11 @@ def convertir_ventas(archivo_origen, archivo_destino):
         max_venta = 0
         
         # Procesar cada columna (día)
-        for col in range(len(df.columns)):
-            fecha_str = fechas[col]
+        for col in df.columns:
+            fecha_str = df.iloc[0][col]
             if isinstance(fecha_str, datetime):  # Si es una fecha válida
                 # Obtener todas las ventas de ese día (ignorando NaN)
-                montos = df.iloc[2:, col].dropna()
+                montos = df.iloc[1:][col].dropna()
                 
                 # Crear una venta por cada monto
                 for monto in montos:
@@ -85,8 +85,12 @@ def convertir_ventas(archivo_origen, archivo_destino):
         return None
 
 if __name__ == "__main__":
-    archivo_origen = "ventasenero25_parte2.xlsx"
-    archivo_destino = "ventas_enero_parte2_convertidas.xlsx"
+    archivo_origen = "_ventas_feb25.xlsx"
+    archivo_destino = "ventas_feb25_convertidas.xlsx"
     
     print("Iniciando conversión de ventas...")
     df_ventas = convertir_ventas(archivo_origen, archivo_destino)
+    if df_ventas is not None:
+        print("\nImportando ventas...")
+        from importar_ventas import importar_ventas
+        importar_ventas(archivo_destino)

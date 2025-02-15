@@ -1,5 +1,5 @@
 from app import create_app
-from models import db, Sale
+from models import db, Sale, Client
 import pandas as pd
 from datetime import datetime
 
@@ -16,6 +16,17 @@ def importar_ventas(archivo_excel):
             ventas_importadas = 0
             total_monto = 0
             
+            # Obtener o crear un cliente por defecto
+            cliente_default = Client.query.filter_by(name='Cliente General').first()
+            if not cliente_default:
+                cliente_default = Client(
+                    name='Cliente General',
+                    email='general@example.com',
+                    phone='0000000000'
+                )
+                db.session.add(cliente_default)
+                db.session.commit()
+            
             print("\nIniciando importación de ventas...")
             
             # Procesar cada venta
@@ -23,9 +34,12 @@ def importar_ventas(archivo_excel):
                 try:
                     # Crear objeto de venta
                     venta = Sale(
-                        timestamp=datetime.strptime(row['fecha'], '%Y-%m-%d'),
+                        date=datetime.strptime(row['fecha'], '%Y-%m-%d'),
                         total_amount=float(row['total_amount']),
-                        products=row['products']  # Ya está en formato JSON
+                        amount_received=float(row['total_amount']),  # Asumimos pago exacto
+                        change_amount=0.0,  # Sin cambio
+                        client_id=cliente_default.id,
+                        is_invoiced=False
                     )
                     
                     # Agregar a la base de datos
@@ -55,5 +69,5 @@ def importar_ventas(archivo_excel):
             db.session.rollback()
 
 if __name__ == "__main__":
-    archivo_excel = "ventas_enero_convertidas.xlsx"
+    archivo_excel = "ventas_feb25_convertidas.xlsx"
     importar_ventas(archivo_excel)
