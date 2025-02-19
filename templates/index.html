@@ -1152,7 +1152,7 @@
 
             // Client Management Functions
             function loadClients(search = '') {
-                fetch(`/clients${search ? '?search=' + encodeURIComponent(search) : ''}`)
+                fetch(`/api/clients?search=${encodeURIComponent(search)}`)
                     .then(response => response.json())
                     .then(clients => {
                         const tbody = document.querySelector('#clientsTable tbody');
@@ -1162,11 +1162,11 @@
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${client.name}</td>
-                                <td>${client.email || '-'}</td>
-                                <td>${client.phone || '-'}</td>
-                                <td>${client.rfc || '-'}</td>
+                                <td>${client.email || ''}</td>
+                                <td>${client.phone || ''}</td>
+                                <td>${client.rfc || ''}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-info" onclick="editClient(${client.id})">
+                                    <button class="btn btn-sm btn-primary" onclick="openClientModal(${client.id})">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-sm btn-danger" onclick="deleteClient(${client.id})">
@@ -1184,46 +1184,42 @@
             }
 
             function searchClients() {
-                const search = document.getElementById('clientSearch').value;
-                loadClients(search);
+                const searchTerm = document.getElementById('clientSearch').value;
+                loadClients(searchTerm);
             }
 
             function openClientModal(clientId = null) {
-                const modal = new bootstrap.Modal(document.getElementById('clientModal'));
-                const title = document.getElementById('clientModalTitle');
                 const form = document.getElementById('clientForm');
-                
-                // Reset form
                 form.reset();
                 document.getElementById('clientId').value = '';
+                document.getElementById('clientModalTitle').textContent = 'Nuevo Cliente';
                 
                 if (clientId) {
-                    title.textContent = 'Editar Cliente';
-                    // Load client data
-                    fetch(`/clients/${clientId}`)
+                    // Load client data for editing
+                    fetch(`/api/clients/${clientId}`)
                         .then(response => response.json())
                         .then(client => {
+                            document.getElementById('clientModalTitle').textContent = 'Editar Cliente';
                             document.getElementById('clientId').value = client.id;
                             document.getElementById('clientName').value = client.name;
                             document.getElementById('clientEmail').value = client.email || '';
                             document.getElementById('clientPhone').value = client.phone || '';
                             document.getElementById('clientRfc').value = client.rfc || '';
                             document.getElementById('clientAddress').value = client.address || '';
-                            modal.show();
                         })
                         .catch(error => {
                             console.error('Error loading client:', error);
                             alert('Error al cargar los datos del cliente');
                         });
-                } else {
-                    title.textContent = 'Nuevo Cliente';
-                    modal.show();
                 }
+                
+                const clientModal = new bootstrap.Modal(document.getElementById('clientModal'));
+                clientModal.show();
             }
 
             function saveClient() {
                 const clientId = document.getElementById('clientId').value;
-                const clientData = {
+                const data = {
                     name: document.getElementById('clientName').value,
                     email: document.getElementById('clientEmail').value,
                     phone: document.getElementById('clientPhone').value,
@@ -1231,28 +1227,28 @@
                     address: document.getElementById('clientAddress').value
                 };
                 
+                const url = clientId ? `/api/clients/${clientId}` : '/api/clients';
                 const method = clientId ? 'PUT' : 'POST';
-                const url = clientId ? `/clients/${clientId}` : '/clients';
                 
                 fetch(url, {
                     method: method,
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(clientData)
+                    body: JSON.stringify(data)
                 })
                 .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        throw new Error(data.error);
+                .then(result => {
+                    if (result.error) {
+                        throw new Error(result.error);
                     }
-                    bootstrap.Modal.getInstance(document.getElementById('clientModal')).hide();
+                    const clientModal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
+                    clientModal.hide();
                     loadClients();
-                    alert(clientId ? 'Cliente actualizado con éxito' : 'Cliente creado con éxito');
                 })
                 .catch(error => {
                     console.error('Error saving client:', error);
-                    alert('Error: ' + error.message);
+                    alert(error.message || 'Error al guardar el cliente');
                 });
             }
 
@@ -1261,20 +1257,19 @@
                     return;
                 }
                 
-                fetch(`/clients/${clientId}`, {
+                fetch(`/api/clients/${clientId}`, {
                     method: 'DELETE'
                 })
                 .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        throw new Error(data.error);
+                .then(result => {
+                    if (result.error) {
+                        throw new Error(result.error);
                     }
                     loadClients();
-                    alert('Cliente eliminado con éxito');
                 })
                 .catch(error => {
                     console.error('Error deleting client:', error);
-                    alert('Error: ' + error.message);
+                    alert(error.message || 'Error al eliminar el cliente');
                 });
             }
 
@@ -1282,6 +1277,16 @@
             document.getElementById('clients-tab').addEventListener('shown.bs.tab', function (e) {
                 loadClients();
             });
+
+            // Add search input event listener
+            const clientSearchInput = document.getElementById('clientSearch');
+            if (clientSearchInput) {
+                let searchTimeout;
+                clientSearchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(searchClients, 300);
+                });
+            }
         });
     </script>
 

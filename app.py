@@ -11,6 +11,7 @@ from sqlalchemy import text
 import pandas as pd
 from werkzeug.utils import secure_filename
 import requests
+from routes.clients import clients_bp
 
 # Load environment variables
 load_dotenv()
@@ -1103,6 +1104,9 @@ def create_app(config_name='default'):
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
+
+    # Register blueprints
+    app.register_blueprint(clients_bp)
 
     return app
 
