@@ -28,6 +28,10 @@ def create_app(config_name='default'):
     
     # Import models after db initialization
     from models import Sale, Invoice, GlobalInvoice, Product, SaleDetail, Client
+    from routes.clients import clients_bp
+    
+    # Register blueprints
+    app.register_blueprint(clients_bp)
     
     with app.app_context():
         db.create_all()

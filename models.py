@@ -98,9 +98,9 @@ class SaleDetail(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
     
-    # Relationship with Product
-    product = db.relationship('Product', backref='sale_details', lazy=True)
-    sale = db.relationship('Sale', back_populates='details', lazy=True)
+    # Relationships
+    sale = db.relationship('Sale', back_populates='details')
+    product = db.relationship('Product')
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
