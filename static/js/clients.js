@@ -183,7 +183,102 @@ function deleteClient(clientId) {
     });
 }
 
+// Función para seleccionar el cliente público general
+function selectPublicGeneral() {
+    const publicGeneralClient = {
+        id: 1,
+        name: 'PUBLICO EN GENERAL',
+        rfc: 'XAXX010101000',
+        regimen_fiscal: '616',
+        codigo_postal: '06000',
+        uso_cfdi: 'S01'
+    };
+    
+    updateSelectedClient(publicGeneralClient);
+    
+    // Cerrar modal si está abierto
+    const modal = bootstrap.Modal.getInstance(document.getElementById('clientSearchModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
 
+// Función para seleccionar un cliente específico
+function selectClientForPOS(client) {
+    updateSelectedClient(client);
+    
+    // Cerrar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('clientSearchModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+
+// Función para actualizar la información del cliente seleccionado
+function updateSelectedClient(client) {
+    document.getElementById('selectedClientId').value = client.id;
+    document.getElementById('selectedClientName').textContent = client.name;
+    document.getElementById('selectedClientRFC').textContent = `RFC: ${client.rfc}`;
+    
+    // Guardar datos completos para facturación
+    window.selectedClientData = client;
+}
+
+// Función para buscar clientes en el modal
+function searchClientsModal() {
+    const searchInput = document.getElementById('clientSearchInput');
+    const searchTerm = searchInput.value.trim();
+    
+    if (searchTerm === '') {
+        return;
+    }
+    
+    fetch(`/api/clients/search?q=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            const resultsContainer = document.getElementById('clientSearchResults');
+            resultsContainer.innerHTML = '';
+            
+            if (data.length === 0) {
+                resultsContainer.innerHTML = '<div class="list-group-item">No se encontraron resultados</div>';
+                return;
+            }
+            
+            data.forEach(client => {
+                const item = document.createElement('button');
+                item.className = 'list-group-item list-group-item-action';
+                item.type = 'button';
+                item.onclick = () => selectClientForPOS(client);
+                
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${client.name}</h6>
+                            <p class="mb-1 small">RFC: ${client.rfc}</p>
+                        </div>
+                        <button class="btn btn-sm btn-primary">Seleccionar</button>
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(item);
+            });
+        })
+        .catch(error => {
+            console.error('Error buscando clientes:', error);
+            showToast('Error', 'Error al buscar clientes', 'error');
+        });
+}
+
+// Event listener para búsqueda en tiempo real en el modal
+document.addEventListener('DOMContentLoaded', function() {
+    const modalSearchInput = document.getElementById('clientSearchInput');
+    if (modalSearchInput) {
+        modalSearchInput.addEventListener('input', debounce(searchClientsModal, 300));
+    }
+    
+    // Inicializar con público general
+    selectPublicGeneral();
+});
 
 // Función de utilidad para debounce
 function debounce(func, wait) {
