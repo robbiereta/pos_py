@@ -1,10 +1,20 @@
 // Variables globales
 let clients = [];
 let clientModal = null;
+let clientSearchModal = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar el modal
-    clientModal = new bootstrap.Modal(document.getElementById('clientModal'));
+    // Inicializar los modales
+    const clientModalElement = document.getElementById('clientModal');
+    const clientSearchModalElement = document.getElementById('clientSearchModal');
+    
+    if (clientModalElement) {
+        clientModal = new bootstrap.Modal(clientModalElement);
+    }
+    
+    if (clientSearchModalElement) {
+        clientSearchModal = new bootstrap.Modal(clientSearchModalElement);
+    }
     
     // Cargar clientes al mostrar la pestaña
     document.getElementById('clients-tab').addEventListener('shown.bs.tab', function (e) {
@@ -15,6 +25,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('clientSearch');
     if (searchInput) {
         searchInput.addEventListener('input', debounce(searchClients, 300));
+    }
+
+    // Event listener para búsqueda en el modal
+    const modalSearchInput = document.getElementById('clientSearchInput');
+    if (modalSearchInput) {
+        modalSearchInput.addEventListener('input', debounce(searchClientsModal, 300));
     }
 
     // Inicializar con el cliente público general
@@ -197,9 +213,8 @@ function selectPublicGeneral() {
     updateSelectedClient(publicGeneralClient);
     
     // Cerrar modal si está abierto
-    const modal = bootstrap.Modal.getInstance(document.getElementById('clientSearchModal'));
-    if (modal) {
-        modal.hide();
+    if (clientSearchModal) {
+        clientSearchModal.hide();
     }
 }
 
@@ -208,9 +223,8 @@ function selectClientForPOS(client) {
     updateSelectedClient(client);
     
     // Cerrar modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('clientSearchModal'));
-    if (modal) {
-        modal.hide();
+    if (clientSearchModal) {
+        clientSearchModal.hide();
     }
 }
 
@@ -268,17 +282,6 @@ function searchClientsModal() {
             showToast('Error', 'Error al buscar clientes', 'error');
         });
 }
-
-// Event listener para búsqueda en tiempo real en el modal
-document.addEventListener('DOMContentLoaded', function() {
-    const modalSearchInput = document.getElementById('clientSearchInput');
-    if (modalSearchInput) {
-        modalSearchInput.addEventListener('input', debounce(searchClientsModal, 300));
-    }
-    
-    // Inicializar con público general
-    selectPublicGeneral();
-});
 
 // Función de utilidad para debounce
 function debounce(func, wait) {
