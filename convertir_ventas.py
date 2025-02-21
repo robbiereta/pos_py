@@ -34,6 +34,18 @@ def convertir_e_importar_ventas(archivo_origen):
                 )
                 db.session.add(cliente_default)
                 db.session.commit()
+
+            # Obtener o crear producto por defecto
+            producto_default = Product.query.filter_by(name='Venta General').first()
+            if not producto_default:
+                producto_default = Product(
+                    name='Venta General',
+                    description='Venta sin producto específico',
+                    price=0.0,
+                    stock=999999
+                )
+                db.session.add(producto_default)
+                db.session.commit()
             
             print("\nIniciando procesamiento de ventas...")
             
@@ -46,40 +58,46 @@ def convertir_e_importar_ventas(archivo_origen):
                     
                     # Crear una venta por cada monto
                     for monto in montos:
-                        if monto > 0:  # Solo procesar montos positivos
-                            # Crear objeto de venta
-                            venta = Sale(
-                                date=fecha_str,
-                                total_amount=float(monto),
-                                amount_received=float(monto),
-                                change_amount=0.0,
-                                client_id=cliente_default.id,
-                                is_invoiced=False
-                            )
-                            
-                            # Crear detalle de venta
-                            detalle = SaleDetail(
-                                quantity=1,
-                                price=float(monto),
-                                sale=venta
-                            )
-                            
-                            # Agregar a la base de datos
-                            db.session.add(venta)
-                            db.session.add(detalle)
-                            
-                            # Actualizar estadísticas
-                            fecha_key = fecha_str.strftime('%Y-%m-%d')
-                            ventas_por_dia[fecha_key] += float(monto)
-                            total_ventas += float(monto)
-                            min_venta = min(min_venta, float(monto))
-                            max_venta = max(max_venta, float(monto))
-                            ventas_importadas += 1
-                            
-                            # Commit cada 100 ventas
-                            if ventas_importadas % 100 == 0:
-                                db.session.commit()
-                                print(f"Procesadas {ventas_importadas} ventas...")
+                        try:
+                            monto_float = float(str(monto).replace(',', ''))
+                            if monto_float > 0:  # Solo procesar montos positivos
+                                # Crear objeto de venta
+                                venta = Sale(
+                                    date=fecha_str,
+                                    total_amount=monto_float,
+                                    amount_received=monto_float,
+                                    change_amount=0.0,
+                                    client_id=cliente_default.id,
+                                    is_invoiced=False
+                                )
+                                
+                                # Crear detalle de venta
+                                detalle = SaleDetail(
+                                    quantity=1,
+                                    price=monto_float,
+                                    product_id=producto_default.id,
+                                    sale=venta
+                                )
+                                
+                                # Agregar a la base de datos
+                                db.session.add(venta)
+                                db.session.add(detalle)
+                                
+                                # Actualizar estadísticas
+                                fecha_key = fecha_str.strftime('%Y-%m-%d')
+                                ventas_por_dia[fecha_key] += monto_float
+                                total_ventas += monto_float
+                                min_venta = min(min_venta, monto_float)
+                                max_venta = max(max_venta, monto_float)
+                                ventas_importadas += 1
+                                
+                                # Commit cada 100 ventas
+                                if ventas_importadas % 100 == 0:
+                                    db.session.commit()
+                                    print(f"Procesadas {ventas_importadas} ventas...")
+                        except (ValueError, TypeError) as e:
+                            print(f"Error al procesar monto: {monto} - {str(e)}")
+                            continue
             
             # Commit final
             db.session.commit()
@@ -110,6 +128,6 @@ def convertir_e_importar_ventas(archivo_origen):
             }
 
 if __name__ == "__main__":
-    archivo_origen = "_ventas_feb25.xlsx"
+    archivo_origen = "ventasfeb25_3semana.xlsx"
     resultado = convertir_e_importar_ventas(archivo_origen)
     print(f"\nEstado final: {resultado['status']}")

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, make_response
+from flask import Flask, request, jsonify, render_template, make_response, send_file
 from flask_cors import CORS
 from flask_migrate import Migrate
 from datetime import datetime
@@ -13,6 +13,9 @@ from werkzeug.utils import secure_filename
 import requests
 from routes.export import export_bp
 from routes.invoice_ocr import invoice_ocr_bp
+import pytesseract
+from PIL import Image
+import io
 
 # Load environment variables
 load_dotenv()
@@ -41,8 +44,8 @@ def create_app(config_name='default'):
         db.create_all()
 
     # Configuración para subida de imágenes
-    UPLOAD_FOLDER = 'static/product_images'
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    UPLOAD_FOLDER = 'static/remisiones'
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
@@ -51,6 +54,108 @@ def create_app(config_name='default'):
 
     def allowed_file(filename):
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+    def process_remision_image(image_path):
+        try:
+            # Configure Tesseract path
+            pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+            
+            # Open and process the image
+            img = Image.open(image_path)
+            text = pytesseract.image_to_string(img, lang='spa')
+            
+            # Process the extracted text
+            lines = text.split('\n')
+            items = []
+            
+            for line in lines:
+                if not line.strip():
+                    continue
+                    
+                parts = line.split()
+                if len(parts) >= 4:
+                    try:
+                        # Find the index of Pza/Par/Pllo/Kit
+                        unit_index = -1
+                        for i, part in enumerate(parts):
+                            if part in ['Pza', 'Par', 'Pllo', 'Kit']:
+                                unit_index = i
+                                break
+                        
+                        if unit_index > 0:
+                            code = parts[0]
+                            description = ' '.join(parts[1:unit_index-2])
+                            box_number = int(parts[unit_index-2])
+                            pieces = float(parts[unit_index-1].replace(',', ''))
+                            unit = parts[unit_index]
+                            price = float(parts[unit_index+1].replace('$', ''))
+                            total = float(parts[unit_index+2].replace('$', ''))
+                            
+                            items.append({
+                                'Código': code,
+                                'Descripción': description,
+                                'No. Caja': box_number,
+                                'Piezas': pieces,
+                                'Unidad': unit,
+                                'Precio': price,
+                                'Importe': total
+                            })
+                    except Exception as e:
+                        print(f"Error processing line: {line}")
+                        print(f"Error: {str(e)}")
+                        continue
+            
+            return items
+        except Exception as e:
+            print(f"Error processing image: {str(e)}")
+            return None
+
+    @app.route('/upload_remision', methods=['GET', 'POST'])
+    def upload_remision():
+        if request.method == 'POST':
+            if 'remision' not in request.files:
+                return 'No file uploaded', 400
+                
+            file = request.files['remision']
+            if file.filename == '':
+                return 'No file selected', 400
+                
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(filepath)
+                
+                # Process the image
+                items = process_remision_image(filepath)
+                if items:
+                    # Create Excel file in memory
+                    output = io.BytesIO()
+                    df = pd.DataFrame(items)
+                    
+                    # Calculate total
+                    total = sum(item['Importe'] for item in items)
+                    
+                    # Create Excel writer
+                    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                        df.to_excel(writer, index=False, sheet_name='Remisión')
+                    
+                    output.seek(0)
+                    
+                    # Clean up the uploaded file
+                    os.remove(filepath)
+                    
+                    return send_file(
+                        output,
+                        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        as_attachment=True,
+                        download_name=f'remision_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+                    )
+                else:
+                    return 'Error processing image', 500
+                    
+            return 'Invalid file type', 400
+            
+        return render_template('upload_remision.html')
 
     @app.route('/')
     def index():
