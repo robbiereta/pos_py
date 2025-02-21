@@ -11,6 +11,8 @@ from sqlalchemy import text
 import pandas as pd
 from werkzeug.utils import secure_filename
 import requests
+from routes.export import export_bp
+from routes.invoice_ocr import invoice_ocr_bp
 
 # Load environment variables
 load_dotenv()
@@ -32,6 +34,8 @@ def create_app(config_name='default'):
     
     # Register blueprints
     app.register_blueprint(clients_bp)
+    app.register_blueprint(export_bp)
+    app.register_blueprint(invoice_ocr_bp)
     
     with app.app_context():
         db.create_all()

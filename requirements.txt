@@ -14,3 +14,7 @@ pytest==8.3.4
 pytest-cov==6.0.0
 pandas==2.1.0          # Para manejar archivos Excel
 openpyxl==3.1.2       # Para soporte de archivos xlsx
+opencv-python==4.11.0.86
+pytesseract==0.3.10
+pillow==10.0.0
+numpy==1.24.3
