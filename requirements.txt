@@ -1,20 +1,16 @@
 Flask==2.3.3
 Flask-SQLAlchemy==3.1.1
-SQLAlchemy==2.0.20
+Flask-Migrate==4.0.5
+Flask-Login==0.6.2
 python-dotenv==1.0.0
-requests==2.31.0  # For SW Sapien API calls
-reportlab==3.6.12  # PDF invoice generation
-qrcode==7.3.1  # For generating QR codes on invoices
-gunicorn==21.2.0
-python-dateutil==2.8.2
 Werkzeug==2.3.7
-Flask-Migrate==4.0.4    # Database migrations
-Flask-Script==2.0.6     # CLI commands
-pytest==8.3.4
-pytest-cov==6.0.0
-pandas==2.1.0          # Para manejar archivos Excel
-openpyxl==3.1.2       # Para soporte de archivos xlsx
-opencv-python==4.11.0.86
+SQLAlchemy==2.0.21
+alembic==1.12.0
+Pillow==10.0.1
+pandas==2.1.1
+openpyxl==3.1.2
 pytesseract==0.3.10
-pillow==10.0.0
-numpy==1.24.3
+python-dateutil==2.8.2
+requests==2.31.0  # For SW Sapien API calls
+pytest==7.4.2
+pytest-cov==4.1.0
