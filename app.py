@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template, make_response, send_file
 from flask_cors import CORS
 from datetime import datetime
-from cfdi_generator import cfdi_generator, cfdi_generator_prod
+from cfdi_generator import CFDIGenerator
 from config import config
 from db import init_db, get_db
 import os

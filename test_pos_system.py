@@ -1,8 +1,9 @@
-from app import app, db
+from app import create_app
+from db import get_db
 from models import Product, Sale, Invoice, GlobalInvoice
 from datetime import datetime, timedelta
 import json
-from cfdi_generator import cfdi_generator, cfdi_generator_prod
+from cfdi_generator import CFDIGenerator
 
 def create_test_products():
     """Create test products if they don't exist"""
@@ -14,13 +15,13 @@ def create_test_products():
         {"name": "Headphones", "price": 899.99}
     ]
     
+    db = get_db()
     for product_data in products:
-        product = Product.query.filter_by(name=product_data["name"]).first()
+        product = db.products.find_one({"name": product_data["name"]})
         if not product:
-            product = Product(name=product_data["name"], price=product_data["price"])
-            db.session.add(product)
+            Product.create_product(db, **product_data)
     
-    db.session.commit()
+    print("Created test products")
 
 def create_test_sales():
     """Create some test sales"""
@@ -38,35 +39,50 @@ def create_test_sales():
         ]
     ]
     
+    db = get_db()
     for products in sales_data:
         total_amount = sum(product["price"] * product["quantity"] for product in products)
-        sale = Sale(total_amount=total_amount, products=products)
-        db.session.add(sale)
-        print(f"Sale ID: {sale.id}")
-        print(f"Total Amount: ${total_amount}")
+        Sale.create_sale(
+            db=db,
+            client_id="65d7e68fcb2f40dff539796d",  # Test client ID
+            total_amount=total_amount,
+            amount_received=total_amount,
+            change_amount=0,
+            details=products
+        )
+        print(f"Created sale with total amount: ${total_amount:,.2f}")
         print(f"Products: {json.dumps(products, indent=2)}")
-        print(f"Timestamp: {sale.timestamp}")
         print("-" * 50)
-    
-    db.session.commit()
 
 def test_individual_invoice(test_mode=True):
     """Test generating individual invoices"""
     print(f"\nTesting Individual Invoice Generation (Mode: {'Test' if test_mode else 'Production'}):")
     print("-" * 50)
     
+    db = get_db()
     # Get a sale that hasn't been invoiced
-    sale = Sale.query.filter_by(is_invoiced=False).first()
+    sale = db.sales.find_one({"is_invoiced": False})
     if not sale:
         print("No uninvoiced sales found")
         return
     
     try:
-        generator = cfdi_generator if test_mode else cfdi_generator_prod
+        generator = CFDIGenerator(test_mode=test_mode)
         result = generator.generate_cfdi(sale)
-        print(f"Generated invoice for sale {sale.id}")
+        print(f"Generated invoice for sale {sale['_id']}")
         print(f"UUID: {result['uuid']}")
+        print(f"Folio: {result['folio']}")
         print(f"XML Sample: {result['xml'][:200]}...")  # Show first 200 chars of XML
+        
+        # Mark sale as invoiced
+        Sale.update_sale(
+            db=db,
+            sale_id=sale['_id'],
+            is_invoiced=True,
+            invoice_uuid=result['uuid'],
+            invoice_date=datetime.now()
+        )
+        
     except Exception as e:
         print(json.dumps({"error": str(e)}))
     
@@ -77,8 +93,9 @@ def test_global_invoice(test_mode=True):
     print(f"\nTesting Global Invoice Generation (Mode: {'Test' if test_mode else 'Production'}):")
     print("-" * 50)
     
+    db = get_db()
     # Get all uninvoiced sales
-    sales = Sale.query.filter_by(is_invoiced=False).all()
+    sales = Sale.get_uninvoiced_sales(db)
     print(f"Found {len(sales)} pending sales for global invoice")
     
     if not sales:
@@ -86,12 +103,23 @@ def test_global_invoice(test_mode=True):
         return
     
     try:
-        date = datetime.now().date()
-        generator = cfdi_generator if test_mode else cfdi_generator_prod
-        result = generator.generate_global_cfdi(sales, date)
+        generator = CFDIGenerator(test_mode=test_mode)
+        result = generator.generate_global_cfdi(sales, datetime.now())
         print(f"Generated global invoice for {len(sales)} sales")
-        print(f"UUID: {result['cfdi_uuid']}")
-        print(f"XML Sample: {result['xml_content'][:200]}...")  # Show first 200 chars of XML
+        print(f"UUID: {result['uuid']}")
+        print(f"Folio: {result['folio']}")
+        print(f"XML Sample: {result['xml'][:200]}...")  # Show first 200 chars of XML
+        
+        # Mark sales as invoiced
+        for sale in sales:
+            Sale.update_sale(
+                db=db,
+                sale_id=sale['_id'],
+                is_invoiced=True,
+                invoice_uuid=result['uuid'],
+                invoice_date=datetime.now()
+            )
+        
     except Exception as e:
         print(json.dumps({"error": str(e)}))
     
@@ -101,21 +129,18 @@ def main():
     """Main test function"""
     print("Starting POS System Test")
     print("=" * 50)
-    print("\nCreated Test Sales:")
+    print("\nCreating Test Sales:")
     print("-" * 50)
     
+    app = create_app('default')
     with app.app_context():
         # Create test data
         create_test_products()
         create_test_sales()
         
-        # Test invoice generation in test mode
+        # Test invoice generation in test mode only
         test_individual_invoice(test_mode=True)
         test_global_invoice(test_mode=True)
-        
-        # Test invoice generation in production mode
-        test_individual_invoice(test_mode=False)
-        test_global_invoice(test_mode=False)
     
     print("\nTest Complete!")
 

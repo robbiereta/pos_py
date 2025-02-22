@@ -1,9 +1,39 @@
 from datetime import datetime
 from bson import ObjectId
 
+class Category:
+    @staticmethod
+    def create_category(db, name, description=None):
+        category = {
+            "name": name,
+            "description": description,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        result = db.categories.insert_one(category)
+        category['_id'] = result.inserted_id
+        return category
+
+    @staticmethod
+    def get_by_id(db, category_id):
+        return db.categories.find_one({"_id": ObjectId(category_id)})
+
+    @staticmethod
+    def get_by_name(db, name):
+        return db.categories.find_one({"name": name})
+
+    @staticmethod
+    def update_category(db, category_id, **kwargs):
+        kwargs['updated_at'] = datetime.utcnow()
+        db.categories.update_one(
+            {"_id": ObjectId(category_id)},
+            {"$set": kwargs}
+        )
+        return db.categories.find_one({"_id": ObjectId(category_id)})
+
 class Product:
     @staticmethod
-    def create_product(db, name, price, stock=0, description=None, sku=None, image_url=None, min_stock=0):
+    def create_product(db, name, price, stock=0, description=None, sku=None, image_url=None, min_stock=0, sat_code=None, category_id=None):
         product = {
             "name": name,
             "price": float(price),
@@ -12,6 +42,8 @@ class Product:
             "sku": sku,
             "image_url": image_url,
             "min_stock": int(min_stock),
+            "sat_code": sat_code,
+            "category_id": ObjectId(category_id) if category_id else None,
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow()
         }
@@ -25,11 +57,14 @@ class Product:
 
     @staticmethod
     def update_product(db, product_id, **kwargs):
+        if 'category_id' in kwargs and kwargs['category_id']:
+            kwargs['category_id'] = ObjectId(kwargs['category_id'])
         kwargs['updated_at'] = datetime.utcnow()
         db.products.update_one(
             {"_id": ObjectId(product_id)},
             {"$set": kwargs}
         )
+        return db.products.find_one({"_id": ObjectId(product_id)})
 
 class Client:
     @staticmethod
@@ -61,6 +96,8 @@ class Sale:
             "amount_received": float(amount_received),
             "change_amount": float(change_amount),
             "is_invoiced": False,
+            "invoice_uuid": None,
+            "invoice_date": None,
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
             "details": details,
@@ -81,6 +118,12 @@ class Sale:
             {"_id": ObjectId(sale_id)},
             {"$set": kwargs}
         )
+        return db.sales.find_one({"_id": ObjectId(sale_id)})
+
+    @staticmethod
+    def get_uninvoiced_sales(db):
+        """Get all sales that haven't been invoiced"""
+        return list(db.sales.find({"is_invoiced": False}))
 
 class SaleDetail:
     @staticmethod
