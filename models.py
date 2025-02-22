@@ -1,153 +1,148 @@
 from datetime import datetime
-from db import db
+from bson import ObjectId
 
-class Product(db.Model):
-    __tablename__ = 'products'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    stock = db.Column(db.Integer, default=0)
-    description = db.Column(db.Text)
-    sku = db.Column(db.String(50), unique=True)
-    image_url = db.Column(db.String(255))
-    min_stock = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "price": self.price,
-            "stock": self.stock,
-            "description": self.description,
-            "sku": self.sku,
-            "image_url": self.image_url,
-            "min_stock": self.min_stock,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None
+class Product:
+    @staticmethod
+    def create_product(db, name, price, stock=0, description=None, sku=None, image_url=None, min_stock=0):
+        product = {
+            "name": name,
+            "price": float(price),
+            "stock": int(stock),
+            "description": description,
+            "sku": sku,
+            "image_url": image_url,
+            "min_stock": int(min_stock),
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
         }
+        result = db.products.insert_one(product)
+        product['_id'] = result.inserted_id
+        return product
 
-class Client(db.Model):
-    __tablename__ = 'clients'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True)
-    phone = db.Column(db.String(20))
-    rfc = db.Column(db.String(13))  # RFC para facturación
-    address = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relationship with sales
-    sales = db.relationship('Sale', back_populates='client', lazy=True)
-    
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'email': self.email,
-            'phone': self.phone,
-            'rfc': self.rfc,
-            'address': self.address,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+    @staticmethod
+    def get_by_id(db, product_id):
+        return db.products.find_one({"_id": ObjectId(product_id)})
+
+    @staticmethod
+    def update_product(db, product_id, **kwargs):
+        kwargs['updated_at'] = datetime.utcnow()
+        db.products.update_one(
+            {"_id": ObjectId(product_id)},
+            {"$set": kwargs}
+        )
+
+class Client:
+    @staticmethod
+    def create_client(db, name, email=None, phone=None, rfc=None, address=None):
+        client = {
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "rfc": rfc,
+            "address": address,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
         }
+        result = db.clients.insert_one(client)
+        client['_id'] = result.inserted_id
+        return client
 
-class Sale(db.Model):
-    __tablename__ = 'sales'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
-    total_amount = db.Column(db.Float, nullable=False)
-    amount_received = db.Column(db.Float, nullable=False)
-    change_amount = db.Column(db.Float, nullable=False)
-    is_invoiced = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Foreign keys
-    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
-    global_invoice_id = db.Column(db.Integer, db.ForeignKey('global_invoice.id'), nullable=True)
-    
-    # Relationships
-    details = db.relationship('SaleDetail', back_populates='sale', lazy=True)
-    global_invoice = db.relationship('GlobalInvoice', back_populates='sales')
-    client = db.relationship('Client', back_populates='sales', lazy=True)
+    @staticmethod
+    def get_by_id(db, client_id):
+        return db.clients.find_one({"_id": ObjectId(client_id)})
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'date': self.date.isoformat(),
-            'total_amount': self.total_amount,
-            'amount_received': self.amount_received,
-            'change_amount': self.change_amount,
-            'is_invoiced': self.is_invoiced,
-            'client': self.client.to_dict() if self.client else None,
-            'details': [detail.to_dict() for detail in self.details]
+class Sale:
+    @staticmethod
+    def create_sale(db, client_id, total_amount, amount_received, change_amount, details):
+        sale = {
+            "client_id": ObjectId(client_id),
+            "date": datetime.utcnow(),
+            "total_amount": float(total_amount),
+            "amount_received": float(amount_received),
+            "change_amount": float(change_amount),
+            "is_invoiced": False,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
+            "details": details,
+            "global_invoice_id": None
         }
+        result = db.sales.insert_one(sale)
+        sale['_id'] = result.inserted_id
+        return sale
 
-class SaleDetail(db.Model):
-    __tablename__ = 'sale_details'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    sale_id = db.Column(db.Integer, db.ForeignKey('sales.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    
-    # Relationships
-    sale = db.relationship('Sale', back_populates='details')
-    product = db.relationship('Product')
-    
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    @staticmethod
+    def get_by_id(db, sale_id):
+        return db.sales.find_one({"_id": ObjectId(sale_id)})
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'product': {
-                'id': self.product.id,
-                'name': self.product.name,
-                'price': self.product.price
-            },
-            'quantity': self.quantity,
-            'price': self.price,
-            'subtotal': self.quantity * self.price
+    @staticmethod
+    def update_sale(db, sale_id, **kwargs):
+        kwargs['updated_at'] = datetime.utcnow()
+        db.sales.update_one(
+            {"_id": ObjectId(sale_id)},
+            {"$set": kwargs}
+        )
+
+class SaleDetail:
+    @staticmethod
+    def create_sale_detail(db, sale_id, product_id, quantity, price):
+        sale_detail = {
+            "sale_id": ObjectId(sale_id),
+            "product_id": ObjectId(product_id),
+            "quantity": int(quantity),
+            "price": float(price),
+            "created_at": datetime.utcnow()
         }
+        result = db.sale_details.insert_one(sale_detail)
+        sale_detail['_id'] = result.inserted_id
+        return sale_detail
 
-class Invoice(db.Model):
-    __tablename__ = 'invoices'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    sale_id = db.Column(db.Integer, db.ForeignKey('sales.id'), nullable=False)
-    cfdi_uuid = db.Column(db.String(36), nullable=False)
-    xml_content = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    sale = db.relationship('Sale', backref=db.backref('invoice', uselist=False))
+    @staticmethod
+    def get_by_id(db, sale_detail_id):
+        return db.sale_details.find_one({"_id": ObjectId(sale_detail_id)})
 
-class GlobalInvoice(db.Model):
-    """Global invoice model"""
-    __tablename__ = 'global_invoice'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date, nullable=False)
-    total_amount = db.Column(db.Float, nullable=False)
-    tax_amount = db.Column(db.Float, nullable=False)
-    cfdi_uuid = db.Column(db.String(36), nullable=False)
-    folio = db.Column(db.String(10))
-    xml_content = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    sales = db.relationship('Sale', back_populates='global_invoice', lazy='dynamic')
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "date": self.date.isoformat() if self.date else None,
-            "total_amount": self.total_amount,
-            "tax_amount": self.tax_amount,
-            "cfdi_uuid": self.cfdi_uuid,
-            "folio": self.folio,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+class Invoice:
+    @staticmethod
+    def create_invoice(db, sale_id, cfdi_uuid, xml_content, timestamp):
+        invoice = {
+            "sale_id": ObjectId(sale_id),
+            "cfdi_uuid": cfdi_uuid,
+            "xml_content": xml_content,
+            "timestamp": timestamp
         }
+        result = db.invoices.insert_one(invoice)
+        invoice['_id'] = result.inserted_id
+        return invoice
+
+    @staticmethod
+    def get_by_id(db, invoice_id):
+        return db.invoices.find_one({"_id": ObjectId(invoice_id)})
+
+class GlobalInvoice:
+    @staticmethod
+    def create_global_invoice(db, date, total_amount, tax_amount, cfdi_uuid, folio, xml_content, sale_ids):
+        global_invoice = {
+            "date": date,
+            "total_amount": float(total_amount),
+            "tax_amount": float(tax_amount),
+            "cfdi_uuid": cfdi_uuid,
+            "folio": folio,
+            "xml_content": xml_content,
+            "created_at": datetime.utcnow(),
+            "sale_ids": [ObjectId(sale_id) for sale_id in sale_ids]
+        }
+        result = db.global_invoices.insert_one(global_invoice)
+        global_invoice['_id'] = result.inserted_id
+
+        # Update all related sales
+        db.sales.update_many(
+            {"_id": {"$in": global_invoice["sale_ids"]}},
+            {"$set": {
+                "global_invoice_id": result.inserted_id,
+                "is_invoiced": True
+            }}
+        )
+        return global_invoice
+
+    @staticmethod
+    def get_by_id(db, invoice_id):
+        return db.global_invoices.find_one({"_id": ObjectId(invoice_id)})

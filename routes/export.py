@@ -3,42 +3,45 @@ import pandas as pd
 from io import BytesIO
 from datetime import datetime
 from models import Sale, Product, Client
-from db import db
+from db import get_db
 
 export_bp = Blueprint('export', __name__)
 
 @export_bp.route('/export/sales', methods=['GET'])
 def export_sales():
     """Export sales data to Excel"""
+    # Get database connection
+    db = get_db()
+    
     # Query all sales
-    sales = Sale.query.all()
+    sales = db.sales.find()
     
     # Create a list to store sale data
     sales_data = []
     
     for sale in sales:
         # Get client info
-        client = Client.query.get(sale.client_id) if sale.client_id else None
-        client_name = client.name if client else "Público General"
-        client_rfc = client.rfc if client else "XAXX010101000"
+        client = db.clients.find_one({'_id': sale.get('client_id')}) if sale.get('client_id') else None
         
-        # Get items from sale
-        for item in sale.items:
-            product = Product.query.get(item.product_id)
-            sales_data.append({
-                'Fecha': sale.date,
-                'Folio': sale.folio,
-                'Cliente': client_name,
-                'RFC': client_rfc,
-                'Producto': product.name,
-                'Cantidad': item.quantity,
-                'Precio Unitario': item.unit_price,
-                'Subtotal': item.subtotal,
-                'IVA': item.tax,
-                'Total': item.total,
-                'Método de Pago': sale.payment_method,
-                'Estado Facturación': 'Facturado' if sale.invoiced else 'Pendiente'
-            })
+        # Get sale details
+        details = db.sale_details.find({'sale_id': sale['_id']})
+        
+        for detail in details:
+            # Get product info
+            product = db.products.find_one({'_id': detail.get('product_id')})
+            
+            if product:
+                sales_data.append({
+                    'Sale ID': str(sale['_id']),
+                    'Date': sale.get('created_at', '').strftime('%Y-%m-%d %H:%M:%S'),
+                    'Client': client.get('name', 'N/A') if client else 'N/A',
+                    'Product': product.get('name', 'N/A'),
+                    'Quantity': detail.get('quantity', 0),
+                    'Price': detail.get('price', 0),
+                    'Total': detail.get('quantity', 0) * detail.get('price', 0),
+                    'Amount Received': sale.get('amount_received', 0),
+                    'Change': sale.get('change_amount', 0)
+                })
     
     # Create DataFrame
     df = pd.DataFrame(sales_data)
@@ -46,18 +49,13 @@ def export_sales():
     # Create Excel file in memory
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Ventas')
-        
-        # Auto-adjust columns width
-        worksheet = writer.sheets['Ventas']
-        for idx, col in enumerate(df.columns):
-            max_length = max(df[col].astype(str).apply(len).max(), len(col)) + 2
-            worksheet.column_dimensions[chr(65 + idx)].width = max_length
+        df.to_excel(writer, sheet_name='Sales', index=False)
     
     output.seek(0)
     
-    # Generate filename with current date
-    filename = f'ventas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+    # Generate filename with timestamp
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'sales_report_{timestamp}.xlsx'
     
     return send_file(
         output,
@@ -69,21 +67,27 @@ def export_sales():
 @export_bp.route('/export/products', methods=['GET'])
 def export_products():
     """Export products data to Excel"""
-    # Query all products
-    products = Product.query.all()
+    # Get database connection
+    db = get_db()
     
-    # Create list of product data
-    products_data = [{
-        'Código': product.code,
-        'Nombre': product.name,
-        'Descripción': product.description,
-        'Precio': product.price,
-        'Unidad': product.unit,
-        'Clave SAT': product.sat_key,
-        'Unidad SAT': product.sat_unit,
-        'IVA': product.tax_included,
-        'Activo': product.active
-    } for product in products]
+    # Query all products
+    products = db.products.find()
+    
+    # Create a list to store product data
+    products_data = []
+    
+    for product in products:
+        products_data.append({
+            'ID': str(product['_id']),
+            'Name': product.get('name', 'N/A'),
+            'SKU': product.get('sku', 'N/A'),
+            'Description': product.get('description', 'N/A'),
+            'Price': product.get('price', 0),
+            'Stock': product.get('stock', 0),
+            'Min Stock': product.get('min_stock', 0),
+            'Created At': product.get('created_at', '').strftime('%Y-%m-%d %H:%M:%S'),
+            'Updated At': product.get('updated_at', '').strftime('%Y-%m-%d %H:%M:%S')
+        })
     
     # Create DataFrame
     df = pd.DataFrame(products_data)
@@ -91,18 +95,13 @@ def export_products():
     # Create Excel file in memory
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Productos')
-        
-        # Auto-adjust columns width
-        worksheet = writer.sheets['Productos']
-        for idx, col in enumerate(df.columns):
-            max_length = max(df[col].astype(str).apply(len).max(), len(col)) + 2
-            worksheet.column_dimensions[chr(65 + idx)].width = max_length
+        df.to_excel(writer, sheet_name='Products', index=False)
     
     output.seek(0)
     
-    # Generate filename with current date
-    filename = f'productos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+    # Generate filename with timestamp
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'products_report_{timestamp}.xlsx'
     
     return send_file(
         output,

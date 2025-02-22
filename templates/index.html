@@ -1031,23 +1031,39 @@
 
             // Función para cargar ventas
             function loadSales(filters = {}) {
-                let url = '/sales?';
+                let url = '/sales';
+                let params = new URLSearchParams();
                 
-                // Agregar filtros a la URL
-                if (filters.startDate) url += `&start_date=${filters.startDate}`;
-                if (filters.endDate) url += `&end_date=${filters.endDate}`;
-                if (filters.minAmount) url += `&min_amount=${filters.minAmount}`;
-                if (filters.maxAmount) url += `&max_amount=${filters.maxAmount}`;
+                // Agregar filtros a los parámetros
+                if (filters.startDate) params.append('start_date', filters.startDate);
+                if (filters.endDate) params.append('end_date', filters.endDate);
+                if (filters.minAmount) params.append('min_amount', filters.minAmount);
+                if (filters.maxAmount) params.append('max_amount', filters.maxAmount);
+                
+                // Agregar los parámetros a la URL si existen
+                if (params.toString()) {
+                    url += '?' + params.toString();
+                }
                 
                 fetch(url)
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
-                        const tbody = document.querySelector('#salesTable tbody');
+                        const tbody = document.querySelector('#salesList');
                         tbody.innerHTML = '';
                         
+                        if (!data.sales || data.sales.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay ventas registradas</td></tr>';
+                            return;
+                        }
+                        
                         data.sales.forEach(sale => {
-                            const row = document.createElement('tr');
                             const date = new Date(sale.date);
+                            const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${sale.id}</td>
                                 <td>${date.toLocaleString()}</td>
@@ -1072,7 +1088,8 @@
                     })
                     .catch(error => {
                         console.error('Error cargando ventas:', error);
-                        alert('Error cargando ventas');
+                        const tbody = document.querySelector('#salesList');
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar las ventas</td></tr>';
                     });
             }
 
@@ -1088,12 +1105,16 @@
                 loadSales(filters);
             });
 
+            // Event listener para el botón de limpiar filtros
+            document.querySelector('#salesFilterForm button[type="reset"]').addEventListener('click', function() {
+                setTimeout(() => loadSales(), 0);
+            });
+
             // Función para ver detalles de una venta
             function viewSaleDetails(saleId) {
                 fetch(`/sales/${saleId}`)
                     .then(response => response.json())
                     .then(sale => {
-                        // Aquí puedes mostrar los detalles en un modal
                         const productsHtml = sale.products.map(product => `
                             <tr>
                                 <td>${product.name}</td>
@@ -1187,32 +1208,25 @@
                 }
             }
 
-            // Cargar ventas al iniciar
-            document.getElementById('sales-tab').addEventListener('shown.bs.tab', function (e) {
+            // Cargar ventas cuando se muestra la pestaña
+            const salesTab = document.getElementById('sales-tab');
+            salesTab.addEventListener('shown.bs.tab', function (e) {
                 loadSales();
             });
+
+            // Cargar ventas inicialmente si estamos en la pestaña de ventas
+            if (document.querySelector('#sales.active')) {
+                loadSales();
+            }
 
             // Iniciar carga de productos
             loadProducts();
 
+            // Cargar ventas inicialmente si estamos en la pestaña de ventas
+            if (document.querySelector('#sales.active')) {
+                loadSales();
+            }
+        });
     </script>
-
-    <!-- Sale Details Modal -->
-    <div class="modal fade" id="saleDetailsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Detalles de la Venta</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="saleDetailsBody">
-                    <!-- Content will be dynamically inserted here -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
 </html>

@@ -1,5 +1,7 @@
-from flask import Blueprint, jsonify, request
-from models import db, Client
+from flask import Blueprint, jsonify, request, current_app
+from models import Client
+from bson import ObjectId
+from datetime import datetime
 
 clients_bp = Blueprint('clients', __name__)
 
@@ -7,28 +9,42 @@ clients_bp = Blueprint('clients', __name__)
 def get_clients():
     try:
         search = request.args.get('search', '').lower()
-        query = Client.query
+        db = current_app.db
         
+        # Construir la consulta
+        query = {}
         if search:
-            query = query.filter(
-                db.or_(
-                    Client.name.ilike(f'%{search}%'),
-                    Client.email.ilike(f'%{search}%'),
-                    Client.phone.ilike(f'%{search}%'),
-                    Client.rfc.ilike(f'%{search}%')
-                )
-            )
+            query = {
+                "$or": [
+                    {"name": {"$regex": search, "$options": "i"}},
+                    {"email": {"$regex": search, "$options": "i"}},
+                    {"phone": {"$regex": search, "$options": "i"}},
+                    {"rfc": {"$regex": search, "$options": "i"}}
+                ]
+            }
         
-        clients = query.all()
-        return jsonify([client.to_dict() for client in clients])
+        # Obtener clientes
+        clients = list(db.clients.find(query))
+        
+        # Convertir ObjectId a string para serialización JSON
+        for client in clients:
+            client['_id'] = str(client['_id'])
+        
+        return jsonify(clients)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@clients_bp.route('/api/clients/<int:client_id>', methods=['GET'])
+@clients_bp.route('/api/clients/<client_id>', methods=['GET'])
 def get_client(client_id):
     try:
-        client = Client.query.get_or_404(client_id)
-        return jsonify(client.to_dict())
+        db = current_app.db
+        client = db.clients.find_one({"_id": ObjectId(client_id)})
+        
+        if not client:
+            return jsonify({'error': 'Cliente no encontrado'}), 404
+            
+        client['_id'] = str(client['_id'])
+        return jsonify(client)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -36,6 +52,7 @@ def get_client(client_id):
 def create_client():
     try:
         data = request.get_json()
+        db = current_app.db
         
         # Validar datos requeridos
         if not data.get('name'):
@@ -43,17 +60,18 @@ def create_client():
             
         # Verificar si ya existe un cliente con el mismo email o RFC
         if data.get('email'):
-            existing_client = Client.query.filter_by(email=data['email']).first()
+            existing_client = db.clients.find_one({"email": data['email']})
             if existing_client:
                 return jsonify({'error': 'Ya existe un cliente con ese email'}), 400
                 
         if data.get('rfc'):
-            existing_client = Client.query.filter_by(rfc=data['rfc']).first()
+            existing_client = db.clients.find_one({"rfc": data['rfc']})
             if existing_client:
                 return jsonify({'error': 'Ya existe un cliente con ese RFC'}), 400
         
         # Crear nuevo cliente
-        client = Client(
+        client = Client.create_client(
+            db,
             name=data['name'],
             email=data.get('email'),
             phone=data.get('phone'),
@@ -61,64 +79,83 @@ def create_client():
             address=data.get('address')
         )
         
-        db.session.add(client)
-        db.session.commit()
+        client['_id'] = str(client['_id'])
+        return jsonify(client), 201
         
-        return jsonify(client.to_dict()), 201
     except Exception as e:
-        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@clients_bp.route('/api/clients/<int:client_id>', methods=['PUT'])
+@clients_bp.route('/api/clients/<client_id>', methods=['PUT'])
 def update_client(client_id):
     try:
-        client = Client.query.get_or_404(client_id)
         data = request.get_json()
+        db = current_app.db
         
-        # Validar datos requeridos
-        if not data.get('name'):
-            return jsonify({'error': 'El nombre es requerido'}), 400
+        # Verificar si el cliente existe
+        client = db.clients.find_one({"_id": ObjectId(client_id)})
+        if not client:
+            return jsonify({'error': 'Cliente no encontrado'}), 404
             
-        # Verificar si ya existe otro cliente con el mismo email o RFC
-        if data.get('email') and data['email'] != client.email:
-            existing_client = Client.query.filter_by(email=data['email']).first()
+        # Verificar duplicados de email y RFC
+        if data.get('email'):
+            existing_client = db.clients.find_one({
+                "_id": {"$ne": ObjectId(client_id)},
+                "email": data['email']
+            })
             if existing_client:
-                return jsonify({'error': 'Ya existe un cliente con ese email'}), 400
+                return jsonify({'error': 'Ya existe otro cliente con ese email'}), 400
                 
-        if data.get('rfc') and data['rfc'] != client.rfc:
-            existing_client = Client.query.filter_by(rfc=data['rfc']).first()
+        if data.get('rfc'):
+            existing_client = db.clients.find_one({
+                "_id": {"$ne": ObjectId(client_id)},
+                "rfc": data['rfc']
+            })
             if existing_client:
-                return jsonify({'error': 'Ya existe un cliente con ese RFC'}), 400
+                return jsonify({'error': 'Ya existe otro cliente con ese RFC'}), 400
         
         # Actualizar cliente
-        client.name = data['name']
-        client.email = data.get('email')
-        client.phone = data.get('phone')
-        client.rfc = data.get('rfc')
-        client.address = data.get('address')
+        update_data = {
+            "name": data.get('name', client['name']),
+            "email": data.get('email', client.get('email')),
+            "phone": data.get('phone', client.get('phone')),
+            "rfc": data.get('rfc', client.get('rfc')),
+            "address": data.get('address', client.get('address')),
+            "updated_at": datetime.utcnow()
+        }
         
-        db.session.commit()
+        db.clients.update_one(
+            {"_id": ObjectId(client_id)},
+            {"$set": update_data}
+        )
         
-        return jsonify(client.to_dict())
+        # Obtener cliente actualizado
+        updated_client = db.clients.find_one({"_id": ObjectId(client_id)})
+        updated_client['_id'] = str(updated_client['_id'])
+        
+        return jsonify(updated_client)
+        
     except Exception as e:
-        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@clients_bp.route('/api/clients/<int:client_id>', methods=['DELETE'])
+@clients_bp.route('/api/clients/<client_id>', methods=['DELETE'])
 def delete_client(client_id):
     try:
-        client = Client.query.get_or_404(client_id)
+        db = current_app.db
         
+        # Verificar si el cliente existe
+        client = db.clients.find_one({"_id": ObjectId(client_id)})
+        if not client:
+            return jsonify({'error': 'Cliente no encontrado'}), 404
+            
         # Verificar si el cliente tiene ventas asociadas
-        if client.sales:
-            return jsonify({
-                'error': 'No se puede eliminar el cliente porque tiene ventas asociadas'
-            }), 400
-        
-        db.session.delete(client)
-        db.session.commit()
+        sales = db.sales.find_one({"client_id": ObjectId(client_id)})
+        if sales:
+            return jsonify({'error': 'No se puede eliminar el cliente porque tiene ventas asociadas'}), 400
+            
+        # Eliminar cliente
+        db.clients.delete_one({"_id": ObjectId(client_id)})
         
         return jsonify({'message': 'Cliente eliminado correctamente'})
+        
     except Exception as e:
-        db.session.rollback()
         return jsonify({'error': str(e)}), 500

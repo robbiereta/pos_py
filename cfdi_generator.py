@@ -1,5 +1,5 @@
 import requests
-from models import Invoice, db, GlobalInvoice
+from models import Invoice, GlobalInvoice
 import os
 from datetime import datetime
 import json
@@ -216,9 +216,9 @@ class CFDIGenerator:
                 cfdi_uuid=result['data']['uuid'],
                 xml_content=result['data']['cfdi']
             )
-            db.session.add(invoice)
-            sale.is_invoiced = True
-            db.session.commit()
+            # db.session.add(invoice)
+            # sale.is_invoiced = True
+            # db.session.commit()
             
             return result
             
@@ -229,13 +229,13 @@ class CFDIGenerator:
         """Get next available folio for global invoices"""
         try:
             # Get last folio from database
-            result = db.session.query(GlobalInvoice.folio)\
-                .order_by(GlobalInvoice.folio.desc())\
-                .first()
+            # result = db.session.query(GlobalInvoice.folio)\
+            #     .order_by(GlobalInvoice.folio.desc())\
+            #     .first()
             
-            if result and result[0]:
-                last_folio = int(result[0])
-                return str(last_folio + 1).zfill(6)  # Format: 000001, 000002, etc.
+            # if result and result[0]:
+            #     last_folio = int(result[0])
+            #     return str(last_folio + 1).zfill(6)  # Format: 000001, 000002, etc.
             return "000001"  # First folio
         except Exception as e:
             print(f"Error getting next folio: {str(e)}")
