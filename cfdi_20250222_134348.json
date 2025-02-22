@@ -1,0 +1,2505 @@
+{
+  "Version": "4.0",
+  "Serie": "G",
+  "Folio": "000001",
+  "Fecha": "2025-02-22T13:43:48",
+  "Sello": "",
+  "FormaPago": "99",
+  "NoCertificado": "",
+  "Certificado": "",
+  "SubTotal": "18056.05",
+  "Moneda": "MXN",
+  "Total": "20945.02",
+  "TipoDeComprobante": "I",
+  "Exportacion": "01",
+  "MetodoPago": "PUE",
+  "LugarExpedicion": "87000",
+  "InformacionGlobal": {
+    "Periodicidad": "02",
+    "Meses": "02",
+    "Año": "2025"
+  },
+  "Emisor": {
+    "Rfc": "FOZA8801257C2",
+    "Nombre": "ALMA ALICIA FLORES ZAVALA",
+    "RegimenFiscal": "626"
+  },
+  "Receptor": {
+    "Rfc": "XAXX010101000",
+    "Nombre": "PUBLICO EN GENERAL",
+    "DomicilioFiscalReceptor": "87000",
+    "RegimenFiscalReceptor": "616",
+    "UsoCFDI": "S01"
+  },
+  "Conceptos": [
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0444fcb2f40dff53974d",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "64.66",
+      "Importe": "64.66",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "64.66",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "10.34"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0444fcb2f40dff53974e",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "1379.31",
+      "Importe": "1379.31",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "1379.31",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "220.69"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0445fcb2f40dff53974f",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "64.66",
+      "Importe": "64.66",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "64.66",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "10.34"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0445fcb2f40dff539750",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "275.86",
+      "Importe": "275.86",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "275.86",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "44.14"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0445fcb2f40dff539751",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "176.72",
+      "Importe": "176.72",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "176.72",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "28.28"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0445fcb2f40dff539752",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "146.55",
+      "Importe": "146.55",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "146.55",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "23.45"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0445fcb2f40dff539753",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "47.41",
+      "Importe": "47.41",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "47.41",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "7.59"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0445fcb2f40dff539754",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "155.17",
+      "Importe": "155.17",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "155.17",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "24.83"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0445fcb2f40dff539755",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "56.03",
+      "Importe": "56.03",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "56.03",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "8.97"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0445fcb2f40dff539756",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "599.14",
+      "Importe": "599.14",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "599.14",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "95.86"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0446fcb2f40dff539757",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "310.34",
+      "Importe": "310.34",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "310.34",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "49.66"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0446fcb2f40dff539758",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "12.93",
+      "Importe": "12.93",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "12.93",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "2.07"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0446fcb2f40dff539759",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "133.62",
+      "Importe": "133.62",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "133.62",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "21.38"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0446fcb2f40dff53975a",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "17.24",
+      "Importe": "17.24",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "17.24",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "2.76"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0446fcb2f40dff53975b",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "103.45",
+      "Importe": "103.45",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "103.45",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "16.55"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0446fcb2f40dff53975c",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "30.17",
+      "Importe": "30.17",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "30.17",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "4.83"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0446fcb2f40dff53975d",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "206.90",
+      "Importe": "206.90",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "206.90",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "33.10"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0446fcb2f40dff53975e",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "383.62",
+      "Importe": "383.62",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "383.62",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "61.38"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0446fcb2f40dff53975f",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "1168.10",
+      "Importe": "1168.10",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "1168.10",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "186.90"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0447fcb2f40dff539760",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "103.45",
+      "Importe": "103.45",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "103.45",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "16.55"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0447fcb2f40dff539761",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "155.17",
+      "Importe": "155.17",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "155.17",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "24.83"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0447fcb2f40dff539762",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "193.97",
+      "Importe": "193.97",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "193.97",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "31.03"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0447fcb2f40dff539763",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "94.83",
+      "Importe": "94.83",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "94.83",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "15.17"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0447fcb2f40dff539764",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "30.17",
+      "Importe": "30.17",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "30.17",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "4.83"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0447fcb2f40dff539765",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "50.00",
+      "Importe": "50.00",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "50.00",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "8.00"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0447fcb2f40dff539766",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "51.72",
+      "Importe": "51.72",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "51.72",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "8.28"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0447fcb2f40dff539767",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "77.59",
+      "Importe": "77.59",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "77.59",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "12.41"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0447fcb2f40dff539768",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "60.34",
+      "Importe": "60.34",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "60.34",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "9.66"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0448fcb2f40dff539769",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "36.21",
+      "Importe": "36.21",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "36.21",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "5.79"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0448fcb2f40dff53976a",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "48.28",
+      "Importe": "48.28",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "48.28",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "7.72"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0448fcb2f40dff53976b",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "142.24",
+      "Importe": "142.24",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "142.24",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "22.76"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0448fcb2f40dff53976c",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "137.93",
+      "Importe": "137.93",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "137.93",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "22.07"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0448fcb2f40dff53976d",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "68.97",
+      "Importe": "68.97",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "68.97",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "11.03"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0448fcb2f40dff53976e",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "146.55",
+      "Importe": "146.55",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "146.55",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "23.45"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0448fcb2f40dff53976f",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "68.97",
+      "Importe": "68.97",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "68.97",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "11.03"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0448fcb2f40dff539770",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "86.21",
+      "Importe": "86.21",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "86.21",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "13.79"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0449fcb2f40dff539771",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "301.72",
+      "Importe": "301.72",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "301.72",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "48.28"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0449fcb2f40dff539772",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "116.38",
+      "Importe": "116.38",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "116.38",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "18.62"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0449fcb2f40dff539773",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "94.83",
+      "Importe": "94.83",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "94.83",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "15.17"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0449fcb2f40dff539774",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "103.45",
+      "Importe": "103.45",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "103.45",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "16.55"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0449fcb2f40dff539775",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "86.21",
+      "Importe": "86.21",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "86.21",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "13.79"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0449fcb2f40dff539776",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "186.21",
+      "Importe": "186.21",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "186.21",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "29.79"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0449fcb2f40dff539777",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "60.34",
+      "Importe": "60.34",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "60.34",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "9.66"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0449fcb2f40dff539778",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "64.66",
+      "Importe": "64.66",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "64.66",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "10.34"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044afcb2f40dff539779",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "25.86",
+      "Importe": "25.86",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "25.86",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "4.14"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044afcb2f40dff53977a",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "34.48",
+      "Importe": "34.48",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "34.48",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "5.52"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044afcb2f40dff53977b",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "54.31",
+      "Importe": "54.31",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "54.31",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "8.69"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044afcb2f40dff53977c",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "189.66",
+      "Importe": "189.66",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "189.66",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "30.34"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044afcb2f40dff53977d",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "36.21",
+      "Importe": "36.21",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "36.21",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "5.79"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044afcb2f40dff53977e",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "77.59",
+      "Importe": "77.59",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "77.59",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "12.41"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044afcb2f40dff53977f",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "112.07",
+      "Importe": "112.07",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "112.07",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "17.93"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044afcb2f40dff539780",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "86.21",
+      "Importe": "86.21",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "86.21",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "13.79"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044bfcb2f40dff539781",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "517.24",
+      "Importe": "517.24",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "517.24",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "82.76"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044bfcb2f40dff539782",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "17.24",
+      "Importe": "17.24",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "17.24",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "2.76"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044bfcb2f40dff539783",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "375.00",
+      "Importe": "375.00",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "375.00",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "60.00"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044bfcb2f40dff539784",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "117.24",
+      "Importe": "117.24",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "117.24",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "18.76"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044bfcb2f40dff539785",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "64.66",
+      "Importe": "64.66",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "64.66",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "10.34"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044bfcb2f40dff539786",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "34.48",
+      "Importe": "34.48",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "34.48",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "5.52"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044bfcb2f40dff539787",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "314.66",
+      "Importe": "314.66",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "314.66",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "50.34"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044bfcb2f40dff539788",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "198.28",
+      "Importe": "198.28",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "198.28",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "31.72"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044bfcb2f40dff539789",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "8.62",
+      "Importe": "8.62",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "8.62",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "1.38"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044cfcb2f40dff53978a",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "94.83",
+      "Importe": "94.83",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "94.83",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "15.17"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044cfcb2f40dff53978b",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "123.28",
+      "Importe": "123.28",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "123.28",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "19.72"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044cfcb2f40dff53978c",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "51.72",
+      "Importe": "51.72",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "51.72",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "8.28"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044cfcb2f40dff53978d",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "862.07",
+      "Importe": "862.07",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "862.07",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "137.93"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044cfcb2f40dff53978e",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "36.21",
+      "Importe": "36.21",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "36.21",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "5.79"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044cfcb2f40dff53978f",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "392.24",
+      "Importe": "392.24",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "392.24",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "62.76"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044cfcb2f40dff539790",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "232.76",
+      "Importe": "232.76",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "232.76",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "37.24"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044cfcb2f40dff539791",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "206.90",
+      "Importe": "206.90",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "206.90",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "33.10"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044cfcb2f40dff539792",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "286.21",
+      "Importe": "286.21",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "286.21",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "45.79"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044dfcb2f40dff539793",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "271.55",
+      "Importe": "271.55",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "271.55",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "43.45"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044dfcb2f40dff539794",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "297.41",
+      "Importe": "297.41",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "297.41",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "47.59"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044dfcb2f40dff539795",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "86.21",
+      "Importe": "86.21",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "86.21",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "13.79"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044dfcb2f40dff539796",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "34.48",
+      "Importe": "34.48",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "34.48",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "5.52"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044dfcb2f40dff539797",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "30.17",
+      "Importe": "30.17",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "30.17",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "4.83"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044dfcb2f40dff539798",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "43.10",
+      "Importe": "43.10",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "43.10",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "6.90"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044dfcb2f40dff539799",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "46.55",
+      "Importe": "46.55",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "46.55",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "7.45"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044dfcb2f40dff53979a",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "275.86",
+      "Importe": "275.86",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "275.86",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "44.14"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044efcb2f40dff53979b",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "68.97",
+      "Importe": "68.97",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "68.97",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "11.03"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044efcb2f40dff53979c",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "189.66",
+      "Importe": "189.66",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "189.66",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "30.34"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044efcb2f40dff53979d",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "12.93",
+      "Importe": "12.93",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "12.93",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "2.07"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044efcb2f40dff53979e",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "56.03",
+      "Importe": "56.03",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "56.03",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "8.97"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044efcb2f40dff53979f",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "15.52",
+      "Importe": "15.52",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "15.52",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "2.48"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044efcb2f40dff5397a0",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "560.34",
+      "Importe": "560.34",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "560.34",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "89.66"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044efcb2f40dff5397a1",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "56.03",
+      "Importe": "56.03",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "56.03",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "8.97"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044efcb2f40dff5397a2",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "65.52",
+      "Importe": "65.52",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "65.52",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "10.48"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044ffcb2f40dff5397a3",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "271.55",
+      "Importe": "271.55",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "271.55",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "43.45"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044ffcb2f40dff5397a4",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "25.86",
+      "Importe": "25.86",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "25.86",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "4.14"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044ffcb2f40dff5397a5",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "82.76",
+      "Importe": "82.76",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "82.76",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "13.24"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044ffcb2f40dff5397a6",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "74.14",
+      "Importe": "74.14",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "74.14",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "11.86"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044ffcb2f40dff5397a7",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "25.86",
+      "Importe": "25.86",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "25.86",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "4.14"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044ffcb2f40dff5397a8",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "31.03",
+      "Importe": "31.03",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "31.03",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "4.97"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044ffcb2f40dff5397a9",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "64.66",
+      "Importe": "64.66",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "64.66",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "10.34"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba044ffcb2f40dff5397aa",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "81.90",
+      "Importe": "81.90",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "81.90",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "13.10"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0450fcb2f40dff5397ab",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "81.90",
+      "Importe": "81.90",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "81.90",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "13.10"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0450fcb2f40dff5397ac",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "38.79",
+      "Importe": "38.79",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "38.79",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "6.21"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0450fcb2f40dff5397ad",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "38.79",
+      "Importe": "38.79",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "38.79",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "6.21"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0450fcb2f40dff5397ae",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "43.10",
+      "Importe": "43.10",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "43.10",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "6.90"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0450fcb2f40dff5397af",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "116.38",
+      "Importe": "116.38",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "116.38",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "18.62"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0450fcb2f40dff5397b0",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "43.10",
+      "Importe": "43.10",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "43.10",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "6.90"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0450fcb2f40dff5397b1",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "258.62",
+      "Importe": "258.62",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "258.62",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "41.38"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0451fcb2f40dff5397b2",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "17.24",
+      "Importe": "17.24",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "17.24",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "2.76"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0451fcb2f40dff5397b3",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "155.17",
+      "Importe": "155.17",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "155.17",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "24.83"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0451fcb2f40dff5397b4",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "362.07",
+      "Importe": "362.07",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "362.07",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "57.93"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0451fcb2f40dff5397b5",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "68.97",
+      "Importe": "68.97",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "68.97",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "11.03"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0451fcb2f40dff5397b6",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "34.48",
+      "Importe": "34.48",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "34.48",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "5.52"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0451fcb2f40dff5397b7",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "193.97",
+      "Importe": "193.97",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "193.97",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "31.03"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0451fcb2f40dff5397b8",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "51.72",
+      "Importe": "51.72",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "51.72",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "8.28"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0451fcb2f40dff5397b9",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "93.10",
+      "Importe": "93.10",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "93.10",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "14.90"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0452fcb2f40dff5397ba",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "77.59",
+      "Importe": "77.59",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "77.59",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "12.41"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0452fcb2f40dff5397bb",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "103.45",
+      "Importe": "103.45",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "103.45",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "16.55"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0452fcb2f40dff5397bc",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "741.38",
+      "Importe": "741.38",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "741.38",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "118.62"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0452fcb2f40dff5397bd",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "31.03",
+      "Importe": "31.03",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "31.03",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "4.97"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0452fcb2f40dff5397be",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "150.86",
+      "Importe": "150.86",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "150.86",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "24.14"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0452fcb2f40dff5397bf",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "4.31",
+      "Importe": "4.31",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "4.31",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "0.69"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0452fcb2f40dff5397c0",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "68.97",
+      "Importe": "68.97",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "68.97",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "11.03"
+          }
+        ]
+      }
+    },
+    {
+      "ClaveProdServ": "01010101",
+      "NoIdentificacion": "67ba0452fcb2f40dff5397c1",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Descripcion": "Venta (1x Producto)",
+      "ValorUnitario": "64.66",
+      "Importe": "64.66",
+      "ObjetoImp": "02",
+      "Impuestos": {
+        "Traslados": [
+          {
+            "Base": "64.66",
+            "Impuesto": "002",
+            "TipoFactor": "Tasa",
+            "TasaOCuota": "0.160000",
+            "Importe": "10.34"
+          }
+        ]
+      }
+    }
+  ],
+  "Impuestos": {
+    "TotalImpuestosTrasladados": "2888.97",
+    "Traslados": [
+      {
+        "Base": "18056.05",
+        "Impuesto": "002",
+        "TipoFactor": "Tasa",
+        "TasaOCuota": "0.160000",
+        "Importe": "2888.97"
+      }
+    ]
+  }
+}

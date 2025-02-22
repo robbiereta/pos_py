@@ -1,7 +1,7 @@
 from models import GlobalInvoice
 from convertir_ventas import create_app
 from datetime import datetime, date
-from cfdi_generator import cfdi_generator 
+from cfdi_generator import CFDIGenerator 
 import os
 
 def generar_factura_global():
@@ -24,14 +24,26 @@ def generar_factura_global():
             subtotal = total_amount / 1.16
             tax_amount = total_amount - subtotal
             
-            # Generar factura global
-            today = date.today()
-            result = cfdi_generator.generate_global_cfdi(sales, today)
+            # Get current date and time
+            current_datetime = datetime.now()
+
+            print(f"\nGenerating Global CFDI for {len(sales)} sales on {current_datetime.strftime('%Y-%m-%d %H:%M:%S')}")
+
+            # Initialize CFDI Generator
+            cfdi_generator = CFDIGenerator(test_mode=False)
+
+            # Generate CFDI
+            result = cfdi_generator.generate_global_cfdi(sales, current_datetime)
+            
+            # Print result
+            print("\nCFDI Generated Successfully!")
+            print(f"UUID: {result['uuid']}")
+            print(f"Folio: {result['folio']}")
             
             # Crear registro de factura global
             global_invoice = GlobalInvoice.create_global_invoice(
                 db=app.db,
-                date=today.isoformat(),  # Convert date to string
+                date=current_datetime.isoformat(),  # Convert date to string
                 total_amount=total_amount,
                 tax_amount=tax_amount,
                 cfdi_uuid=result['uuid'],
@@ -46,6 +58,19 @@ def generar_factura_global():
             print(f"Total: ${global_invoice['total_amount']:,.2f}")
             print(f"IVA: ${global_invoice['tax_amount']:,.2f}")
             print(f"Ventas incluidas: {len(global_invoice['sale_ids'])}")
+            
+            # Mark sales as invoiced
+            for sale in sales:
+                app.db.sales.update_one(
+                    {'_id': sale['_id']},
+                    {'$set': {
+                        'is_invoiced': True,
+                        'invoice_uuid': result['uuid'],
+                        'invoice_date': current_datetime
+                    }}
+                )
+            
+            print(f"\nMarked {len(sales)} sales as invoiced")
             
             return global_invoice
             

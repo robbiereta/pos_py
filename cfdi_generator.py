@@ -11,8 +11,8 @@ load_dotenv()
 class CFDIGenerator:
     def __init__(self, test_mode=False):
         self.test_mode = test_mode
-        self.url = 'https://services.sw.com.mx' if not test_mode else os.getenv('SW_URL', 'http://services.test.sw.com.mx')
-        self.token = os.getenv('SW_TOKEN_P') if not test_mode else os.getenv('SW_TOKEN')
+        self.url =os.getenv('SW_URL', 'http://services.test.sw.com.mx')
+        self.token = os.getenv('SW_TOKEN')
         self.headers = {
             'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/jsontoxml'
@@ -53,28 +53,38 @@ class CFDIGenerator:
             return receptor_data
 
     def _prepare_conceptos(self, sales):
-        """Prepare conceptos for CFDI, each sale is a separate concepto"""
+        """Prepare conceptos (line items) for CFDI"""
         conceptos = []
         for sale in sales:
             # Extract subtotal from total (VAT is included)
             total_amount = float(sale['total_amount'])
             subtotal = round(total_amount / 1.16, 2)
             tax_amount = round(total_amount - subtotal, 2)
-            descripcion = "Venta"
+            
+            # Get sale details if available
+            sale_details = []
+            if 'details' in sale:
+                for detail in sale['details']:
+                    product_name = detail.get('product_name', 'Producto')
+                    quantity = detail.get('quantity', 1)
+                    sale_details.append(f"{quantity}x {product_name}")
+            
+           
+            
             concepto = {
                 "ClaveProdServ": "01010101",  # No existe en el catálogo
                 "NoIdentificacion": str(sale['_id']),
                 "Cantidad": 1,
-                "ClaveUnidad": "ACT",  # Actividad
-                "Descripcion": descripcion,
+                "ClaveUnidad": "ACT",
+                "Descripcion": "Venta",
                 "ValorUnitario": f"{subtotal:.2f}",
                 "Importe": f"{subtotal:.2f}",
-                "ObjetoImp": "02",  # Sí objeto de impuesto
+                "ObjetoImp": "02",
                 "Impuestos": {
                     "Traslados": [
                         {
                             "Base": f"{subtotal:.2f}",
-                            "Impuesto": "002",
+                            "Impuesto": "002",  # IVA
                             "TipoFactor": "Tasa",
                             "TasaOCuota": "0.160000",
                             "Importe": f"{tax_amount:.2f}"
@@ -84,6 +94,21 @@ class CFDIGenerator:
             }
             conceptos.append(concepto)
         return conceptos
+
+    def _prepare_impuestos(self, subtotal, tax_amount):
+        """Prepare impuestos (taxes) section for CFDI"""
+        return {
+            "TotalImpuestosTrasladados": f"{tax_amount:.2f}",
+            "Traslados": [
+                {
+                    "Base": f"{subtotal:.2f}",
+                    "Impuesto": "002",  # IVA
+                    "TipoFactor": "Tasa",
+                    "TasaOCuota": "0.160000",
+                    "Importe": f"{tax_amount:.2f}"
+                }
+            ]
+        }
 
     def _save_cfdi_json(self, comprobante, prefix="cfdi"):
         """Save CFDI JSON to file for debugging"""
@@ -231,10 +256,15 @@ class CFDIGenerator:
     def generate_global_cfdi(self, sales, date):
         """Generate a global CFDI for multiple sales"""
         try:
-            # Calculate totals
-            total_amount = sum(float(sale['total_amount']) for sale in sales)
-            subtotal = round(total_amount / 1.16, 2)
-            tax_amount = round(total_amount - subtotal, 2)
+            # First prepare concepts to get exact tax amounts
+            conceptos = self._prepare_conceptos(sales)
+            
+            # Calculate totals from concepts to ensure consistency
+            subtotal = sum(float(concepto['Importe']) for concepto in conceptos)
+            total_tax = sum(float(traslado['Importe']) 
+                          for concepto in conceptos 
+                          for traslado in concepto['Impuestos']['Traslados'])
+            total_amount = round(subtotal + total_tax, 2)
             
             # Get next folio
             folio = self._get_next_global_folio()
@@ -242,10 +272,13 @@ class CFDIGenerator:
             # Prepare CFDI
             comprobante = {
                 "Version": "4.0",
-                "Serie": "FG",  # Factura Global
+                "Serie": "G",  # Factura Global
                 "Folio": folio,
                 "Fecha": date.strftime("%Y-%m-%dT%H:%M:%S"),
-                "FormaPago": "01",  # Efectivo
+                "Sello": "",
+                "FormaPago": "99",
+                "NoCertificado": "",
+                "Certificado": "",
                 "SubTotal": f"{subtotal:.2f}",
                 "Moneda": "MXN",
                 "Total": f"{total_amount:.2f}",
@@ -253,9 +286,15 @@ class CFDIGenerator:
                 "Exportacion": "01",  # No aplica
                 "MetodoPago": "PUE",  # Pago en una sola exhibición
                 "LugarExpedicion": os.getenv('SAT_CP'),
+                "InformacionGlobal": {
+                    "Periodicidad": "02",
+                    "Meses": date.strftime("%m"),
+                    "Año": date.strftime("%Y")
+                },
                 "Emisor": self._prepare_emisor(),
                 "Receptor": self._prepare_receptor(True),
-                "Conceptos": self._prepare_conceptos(sales)
+                "Conceptos": conceptos,
+                "Impuestos": self._prepare_impuestos(subtotal, total_tax)
             }
             
             if self.test_mode:
@@ -274,33 +313,12 @@ class CFDIGenerator:
             
             return {
                 'uuid': result['data']['uuid'],
-                'folio': result['folio'],
+                'folio': folio,
                 'xml': result['data']['cfdi']
             }
             
         except Exception as e:
             raise Exception(f"Error generating Global CFDI: {str(e)}")
 
-    def download_xml_from_pac(self, uuid):
-        """Download XML directly from PAC using UUID"""
-        try:
-            response = requests.get(
-                f"{self.url}/v4/cfdi/{uuid}/xml",
-                headers={'Authorization': f'Bearer {self.token}'}
-            )
-            
-            if response.status_code == 200:
-                return response.text
-            else:
-                error_msg = f"Error al descargar XML del PAC: Status {response.status_code}, Response: {response.text}"
-                print(f"PAC Error: {error_msg}")  # Log error for debugging
-                raise Exception(error_msg)
-                
-        except Exception as e:
-            error_msg = f"Error al contactar al PAC: {str(e)}"
-            print(f"PAC Error: {error_msg}")  # Log error for debugging
-            raise Exception(error_msg)
-
 # Create singleton instances for different modes
-cfdi_generator = CFDIGenerator(test_mode=True)  # For testing
-cfdi_generator_prod = CFDIGenerator(test_mode=False)  # For production
+cfdi_generator = CFDIGenerator(test_mode=False) 
