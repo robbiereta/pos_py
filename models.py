@@ -53,10 +53,10 @@ class Client:
 
 class Sale:
     @staticmethod
-    def create_sale(db, client_id, total_amount, amount_received, change_amount, details):
+    def create_sale(db, client_id, total_amount, amount_received, change_amount, details, date=None):
         sale = {
             "client_id": ObjectId(client_id),
-            "date": datetime.utcnow(),
+            "date": date if date else datetime.utcnow(),
             "total_amount": float(total_amount),
             "amount_received": float(amount_received),
             "change_amount": float(change_amount),

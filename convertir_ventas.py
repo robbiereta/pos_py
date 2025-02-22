@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 from collections import defaultdict
 from flask import Flask
-from flask_pymongo import PyMongo
+from pymongo import MongoClient
 from models import Sale, Client, SaleDetail, Product
 import os
 from dotenv import load_dotenv
@@ -15,20 +15,28 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
     
-    # Configure MongoDB
-    mongodb_uri = os.getenv("MONGODB_URI")
-    if '?' in mongodb_uri:
-        mongodb_uri = mongodb_uri.split('?')[0] + '/pos_system?' + mongodb_uri.split('?')[1]
-    else:
-        mongodb_uri = mongodb_uri + '/pos_system'
-    
-    app.config["MONGO_URI"] = mongodb_uri
-    
-    # Initialize MongoDB
-    mongo = PyMongo(app)
-    app.db = mongo.db
-    
-    return app
+    try:
+        # Configure MongoDB
+        mongodb_uri = os.getenv("MONGODB_URI")    
+        if not mongodb_uri:
+            raise ValueError("MONGODB_URI not found in environment variables")
+        
+        # Initialize MongoDB using PyMongo directly
+        client = MongoClient(mongodb_uri)
+        db = client['pos_db']  # Use explicit database name
+        
+        # Test connection
+        client.server_info()
+        
+        # Store mongo instance in app
+        app.mongo_client = client
+        app.db = db
+        
+        return app
+        
+    except Exception as e:
+        print(f"Error initializing MongoDB: {str(e)}")
+        raise
 
 def convertir_e_importar_ventas(archivo_origen):
     # Crear la aplicación y el contexto
@@ -37,6 +45,9 @@ def convertir_e_importar_ventas(archivo_origen):
     with app.app_context():
         try:
             # Obtener la conexión a MongoDB
+            if not hasattr(app, 'db') or app.db is None:
+                raise ValueError("MongoDB connection not properly initialized")
+            
             db = app.db
             
             # Leer el archivo de ventas original
@@ -98,7 +109,8 @@ def convertir_e_importar_ventas(archivo_origen):
                                         'product_id': producto_default['_id'],
                                         'quantity': 1,
                                         'price': monto_float
-                                    }]
+                                    }],
+                                    date=fecha_str  # Pasar la fecha del Excel
                                 )
                                 
                                 # Actualizar estadísticas

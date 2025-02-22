@@ -57,25 +57,13 @@ class CFDIGenerator:
         conceptos = []
         for sale in sales:
             # Extract subtotal from total (VAT is included)
-            subtotal = round(sale.total_amount / 1.16, 2)
-            tax_amount = round(sale.total_amount - subtotal, 2)
-            
-            # Obtener productos de la venta
-            try:
-                productos = sale.products
-                if isinstance(productos, list):
-                    descripcion = ", ".join([f"{p.get('quantity', 1)}x {p.get('name', 'Producto')}" for p in productos])
-                elif isinstance(productos, dict):
-                    descripcion = ", ".join([f"{qty}x {name}" for name, qty in productos.items()])
-                else:
-                    descripcion = "Venta"
-            except Exception as e:
-                print(f"Error al procesar productos de venta {sale.id}: {str(e)}")
-                descripcion = f"Venta"
-            
+            total_amount = float(sale['total_amount'])
+            subtotal = round(total_amount / 1.16, 2)
+            tax_amount = round(total_amount - subtotal, 2)
+            descripcion = "Venta"
             concepto = {
                 "ClaveProdServ": "01010101",  # No existe en el catálogo
-                "NoIdentificacion": str(sale.id),
+                "NoIdentificacion": str(sale['_id']),
                 "Cantidad": 1,
                 "ClaveUnidad": "ACT",  # Actividad
                 "Descripcion": descripcion,
@@ -95,7 +83,6 @@ class CFDIGenerator:
                 }
             }
             conceptos.append(concepto)
-        
         return conceptos
 
     def _save_cfdi_json(self, comprobante, prefix="cfdi"):
@@ -193,12 +180,12 @@ class CFDIGenerator:
             comprobante = {
                 "Version": "4.0",
                 "Serie": "A",
-                "Folio": str(sale.id),
+                "Folio": str(sale['_id']),
                 "Fecha": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
                 "FormaPago": "01",  # Efectivo
-                "SubTotal": f"{sale.total_amount:.2f}",
+                "SubTotal": f"{sale['total_amount']:.2f}",
                 "Moneda": "MXN",
-                "Total": f"{sale.total_amount * 1.16:.2f}",  # Including IVA
+                "Total": f"{sale['total_amount'] * 1.16:.2f}",  # Including IVA
                 "TipoDeComprobante": "I",  # Ingreso
                 "Exportacion": "01",  # No aplica
                 "MetodoPago": "PUE",  # Pago en una sola exhibición
@@ -212,7 +199,7 @@ class CFDIGenerator:
             
             # Create invoice record
             invoice = Invoice(
-                sale_id=sale.id,
+                sale_id=sale['_id'],
                 cfdi_uuid=result['data']['uuid'],
                 xml_content=result['data']['cfdi']
             )
@@ -244,66 +231,52 @@ class CFDIGenerator:
     def generate_global_cfdi(self, sales, date):
         """Generate a global CFDI for multiple sales"""
         try:
-            # Calculate subtotal and tax for each sale first
-            sale_amounts = []
-            for sale in sales:
-                subtotal = round(sale.total_amount / 1.16, 2)
-                tax = round(sale.total_amount - subtotal, 2)
-                sale_amounts.append({
-                    'subtotal': subtotal,
-                    'tax': tax,
-                    'total': sale.total_amount
-                })
-
-            # Get total amounts
-            total_subtotal = sum(amt['subtotal'] for amt in sale_amounts)
-            total_tax = sum(amt['tax'] for amt in sale_amounts)
-            total_amount = sum(amt['total'] for amt in sale_amounts)
-
+            # Calculate totals
+            total_amount = sum(float(sale['total_amount']) for sale in sales)
+            subtotal = round(total_amount / 1.16, 2)
+            tax_amount = round(total_amount - subtotal, 2)
+            
             # Get next folio
-            next_folio = self._get_next_global_folio()
-
-            # Prepare CFDI data
+            folio = self._get_next_global_folio()
+            
+            # Prepare CFDI
             comprobante = {
                 "Version": "4.0",
-                "Folio": next_folio,
-                "Serie": "G",
+                "Serie": "FG",  # Factura Global
+                "Folio": folio,
                 "Fecha": date.strftime("%Y-%m-%dT%H:%M:%S"),
-                "Sello":"",
-                "FormaPago": "99",
-                "NoCertificado": "",
-                "Certificado": "",
-                "SubTotal": f"{total_subtotal:.2f}",
+                "FormaPago": "01",  # Efectivo
+                "SubTotal": f"{subtotal:.2f}",
                 "Moneda": "MXN",
                 "Total": f"{total_amount:.2f}",
-                "TipoDeComprobante": "I",
-                "Exportacion": "01",
-                "MetodoPago": "PUE",
+                "TipoDeComprobante": "I",  # Ingreso
+                "Exportacion": "01",  # No aplica
+                "MetodoPago": "PUE",  # Pago en una sola exhibición
                 "LugarExpedicion": os.getenv('SAT_CP'),
-                "InformacionGlobal": {
-                    "Periodicidad": "04", # Diario
-                    "Meses": date.strftime("%m"), # Mes actual
-                    "Año": date.strftime("%Y")  # Año actual
-                },
                 "Emisor": self._prepare_emisor(),
-                "Receptor": self._prepare_receptor(),
-                "Conceptos": self._prepare_conceptos(sales),
-                "Impuestos": {
-                    "TotalImpuestosTrasladados": f"{total_tax:.2f}",
-                    "Traslados": [
-                        {
-                            "Base": f"{total_subtotal:.2f}",
-                            "Impuesto": "002",
-                            "TipoFactor": "Tasa",
-                            "TasaOCuota": "0.160000",
-                            "Importe": f"{total_tax:.2f}"
-                        }
-                    ]
-                }
+                "Receptor": self._prepare_receptor(True),
+                "Conceptos": self._prepare_conceptos(sales)
             }
             
-            # Call SW Sapien API
-            return self._call_sw_sapien_api(comprobante)
+            if self.test_mode:
+                # En modo prueba, solo devolver un resultado simulado
+                print("\nModo prueba - Simulando timbrado de CFDI")
+                self._save_cfdi_json(comprobante, "global_cfdi")
+                test_uuid = f'TEST-UUID-{datetime.now().strftime("%Y%m%d-%H%M%S")}'
+                return {
+                    'uuid': test_uuid,
+                    'folio': folio,
+                    'xml': '<xml>Test XML Content</xml>'
+                }
+            
+            # Call PAC API
+            result = self._call_sw_sapien_api(comprobante)
+            
+            return {
+                'uuid': result['data']['uuid'],
+                'folio': result['folio'],
+                'xml': result['data']['cfdi']
+            }
             
         except Exception as e:
             raise Exception(f"Error generating Global CFDI: {str(e)}")

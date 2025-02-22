@@ -1,17 +1,16 @@
-from models import db, Sale, GlobalInvoice, Invoice
-from cfdi_generator import cfdi_generator 
+from models import GlobalInvoice
+from convertir_ventas import create_app
 from datetime import datetime, date
-from app import create_app
+from cfdi_generator import cfdi_generator 
 import os
 
 def generar_factura_global():
     app = create_app()
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pos.db'
-
+    
     with app.app_context():
         try:
             # Obtener ventas no facturadas
-            sales = Sale.query.filter_by(is_invoiced=False).all()
+            sales = list(app.db.sales.find({"is_invoiced": False}))
             
             if not sales:
                 print("No hay ventas pendientes por facturar.")
@@ -20,45 +19,39 @@ def generar_factura_global():
             print(f"\nGenerando factura global para {len(sales)} ventas...")
             
             # Calcular totales
-            total_amount = sum(sale.total_amount for sale in sales)
+            total_amount = sum(sale['total_amount'] for sale in sales)
             # El IVA ya está incluido en el total, así que lo extraemos (16%)
             subtotal = total_amount / 1.16
             tax_amount = total_amount - subtotal
             
             # Generar factura global
-            result = cfdi_generator.generate_global_cfdi(sales, date.today())
+            today = date.today()
+            result = cfdi_generator.generate_global_cfdi(sales, today)
             
             # Crear registro de factura global
-            global_invoice = GlobalInvoice(
-                date=date.today(),
+            global_invoice = GlobalInvoice.create_global_invoice(
+                db=app.db,
+                date=today.isoformat(),  # Convert date to string
                 total_amount=total_amount,
                 tax_amount=tax_amount,
                 cfdi_uuid=result['uuid'],
-                folio=result['folio'],  # Save the folio
-                xml_content=result['xml']
+                folio=result['folio'],
+                xml_content=result['xml'],
+                sale_ids=[sale['_id'] for sale in sales]
             )
             
-            # Guardar factura global
-            db.session.add(global_invoice)
-            
-            # Marcar ventas como facturadas y asociarlas a la factura global
-            for sale in sales:
-                sale.is_invoiced = True
-                sale.global_invoice = global_invoice
-            
-            # Guardar cambios
-            db.session.commit()
-            
             print("\nFactura global generada exitosamente:")
-            print(f"UUID: {result['uuid']}")
-            print(f"Subtotal: ${subtotal:.2f}")
-            print(f"IVA: ${tax_amount:.2f}")
-            print(f"Total: ${total_amount:.2f}")
-            print(f"Ventas incluidas: {len(sales)}")
+            print(f"UUID: {global_invoice['cfdi_uuid']}")
+            print(f"Folio: {global_invoice['folio']}")
+            print(f"Total: ${global_invoice['total_amount']:,.2f}")
+            print(f"IVA: ${global_invoice['tax_amount']:,.2f}")
+            print(f"Ventas incluidas: {len(global_invoice['sale_ids'])}")
+            
+            return global_invoice
             
         except Exception as e:
-            print(f"\nError: {str(e)}")
-            db.session.rollback()
+            print(f"Error al generar factura global: {str(e)}")
+            return None
 
 if __name__ == "__main__":
     generar_factura_global()
