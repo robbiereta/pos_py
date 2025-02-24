@@ -1,8 +1,17 @@
 import pandas as pd
-from app import create_app
-from db import init_db, get_db
-from models import Product
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+from pymongo import MongoClient
+from models import Product
+
+# Load environment variables
+load_dotenv()
+
+def get_db():
+    """Get MongoDB database instance"""
+    client = MongoClient(os.getenv('MONGODB_URI'))
+    return client.pos_system
 
 def import_products_from_excel(file_path):
     """Import products from Excel file"""
@@ -24,12 +33,11 @@ def import_products_from_excel(file_path):
     for index, row in df.iterrows():
         try:
             # Clean and prepare data
-            sku = str(row['MOTACE']).strip()
-            name = str(row['ACEITE']).strip()
-            price = float(row[25]) if pd.notna(row[25]) else 0.0
-            sat_code = str(row[15121500]).strip() if pd.notna(row[15121500]) else None
+            sku = str(row['CODIGO']).strip() if pd.notna(row['CODIGO']) else None
+            name = str(row['PRODUCTO']).strip() if pd.notna(row['PRODUCTO']) else None
+            price = float(row['P. VENTA ']) if pd.notna(row['P. VENTA ']) else 0.0
             
-            if not name or name == 'ACEITE':
+            if not name or name == 'PRODUCTO':
                 print(f"Skipping row {index + 2}: Missing product name")
                 errors += 1
                 continue
@@ -39,35 +47,39 @@ def import_products_from_excel(file_path):
             
             if existing_product:
                 # Update existing product
-                Product.update_product(
-                    db=db,
-                    product_id=existing_product['_id'],
-                    price=price,
-                    sku=sku,
-                    sat_code=sat_code,
-                    updated_at=datetime.utcnow()
+                db.products.update_one(
+                    {"_id": existing_product['_id']},
+                    {
+                        "$set": {
+                            "price": price,
+                            "sku": sku,
+                            "updated_at": datetime.utcnow()
+                        }
+                    }
                 )
                 updated += 1
                 print(f"Updated product: {name}")
             else:
                 # Create new product
-                Product.create_product(
-                    db=db,
-                    name=name,
-                    price=price,
-                    sku=sku,
-                    sat_code=sat_code,
-                    stock=0,
-                    min_stock=0
-                )
+                db.products.insert_one({
+                    "name": name,
+                    "price": price,
+                    "sku": sku,
+                    "created_at": datetime.utcnow(),
+                    "updated_at": datetime.utcnow()
+                })
                 created += 1
                 print(f"Created product: {name}")
                 
+        except KeyError as e:
+            print(f"Error in row {index + 2}: {str(e)}")
+            errors += 1
+            continue
         except Exception as e:
             print(f"Error in row {index + 2}: {str(e)}")
             errors += 1
+            continue
     
-    # Print summary
     print("\nImport Summary:")
     print("-" * 50)
     print(f"Products created: {created}")
@@ -77,10 +89,11 @@ def import_products_from_excel(file_path):
 
 def main():
     """Main function"""
-    app = create_app('default')
-    with app.app_context():
-        init_db(app)  # Initialize database with app instance
-        import_products_from_excel('prods.xlsx')
+    if len(sys.argv) < 2:
+        print("Usage: python import_products.py <excel_file>")
+        sys.exit(1)
+    import_products_from_excel(sys.argv[1])
 
 if __name__ == "__main__":
+    import sys
     main()

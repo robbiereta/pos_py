@@ -1,6 +1,11 @@
 import pandas as pd
+import os
 from pymongo import MongoClient
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 def import_categories_from_csv(file_path):
     """Import categories from CSV file"""
@@ -10,8 +15,13 @@ def import_categories_from_csv(file_path):
     # Read CSV file
     df = pd.read_csv(file_path)
     
-    # Initialize MongoDB connection
-    client = MongoClient('mongodb://localhost:27017/')
+    # Initialize MongoDB connection using environment variable
+    mongo_uri = os.getenv("MONGODB_URI")
+    if not mongo_uri:
+        mongo_uri = 'mongodb://localhost:27017/'
+        print("Warning: MONGODB_URI not found in environment, using default local connection")
+    
+    client = MongoClient(mongo_uri)
     db = client.pos_system
     
     # Initialize counters
@@ -23,38 +33,39 @@ def import_categories_from_csv(file_path):
     for index, row in df.iterrows():
         try:
             # Clean and prepare data
-            sku = str(row['MOTACE']).strip()
+            code = str(row['MOTACE']).strip()
             name = str(row['ACEITE']).strip()
+            sat_code = str(row.iloc[3]).strip() if len(row) > 3 else ''
             
             if not name:
-                print(f"Skipping row {index + 2}: Missing product name")
+                print(f"Skipping row {index + 2}: Missing category name")
                 errors += 1
                 continue
+                
+            # Check if category exists by code
+            existing_category = db.categories.find_one({"code": code})
             
-            # Extract category from the SKU (first 3 letters)
-            category_name = sku[:3] if sku else None
-            if not category_name:
-                print(f"Skipping row {index + 2}: Cannot extract category")
-                errors += 1
-                continue
-            
-            # Check if category exists
-            existing_category = db.categories.find_one({"name": category_name})
+            category_data = {
+                "code": code,
+                "name": name,
+                "sat_code": sat_code,
+                "updated_at": datetime.utcnow()
+            }
             
             if existing_category:
+                # Update existing category
+                db.categories.update_one(
+                    {"_id": existing_category["_id"]},
+                    {"$set": category_data}
+                )
                 updated += 1
-                print(f"Category already exists: {category_name}")
+                print(f"Updated category: {code} - {name} (SAT: {sat_code})")
             else:
                 # Create new category
-                category = {
-                    "name": category_name,
-                    "description": f"Category for {category_name} products",
-                    "created_at": datetime.utcnow(),
-                    "updated_at": datetime.utcnow()
-                }
-                db.categories.insert_one(category)
+                category_data["created_at"] = datetime.utcnow()
+                db.categories.insert_one(category_data)
                 created += 1
-                print(f"Created category: {category_name}")
+                print(f"Created category: {code} - {name} (SAT: {sat_code})")
                 
         except Exception as e:
             print(f"Error in row {index + 2}: {str(e)}")
@@ -64,7 +75,7 @@ def import_categories_from_csv(file_path):
     print("\nImport Summary:")
     print("-" * 50)
     print(f"Categories created: {created}")
-    print(f"Categories already exist: {updated}")
+    print(f"Categories updated: {updated}")
     print(f"Errors: {errors}")
     print(f"Total rows processed: {len(df)}")
 
@@ -73,8 +84,13 @@ def assign_categories_to_products():
     print("\nAssigning categories to products")
     print("=" * 50)
     
-    # Initialize MongoDB connection
-    client = MongoClient('mongodb://localhost:27017/')
+    # Initialize MongoDB connection using environment variable
+    mongo_uri = os.getenv("MONGODB_URI")
+    if not mongo_uri:
+        mongo_uri = 'mongodb://localhost:27017/'
+        print("Warning: MONGODB_URI not found in environment, using default local connection")
+    
+    client = MongoClient(mongo_uri)
     db = client.pos_system
     
     # Initialize counters
@@ -124,8 +140,8 @@ def assign_categories_to_products():
 
 def main():
     """Main function"""
-    # Import categories
-    import_categories_from_csv('prods.csv')
+    # Import categories from cat.csv
+    import_categories_from_csv('cat.csv')
     
     # Assign categories to products
     assign_categories_to_products()
