@@ -1,6 +1,5 @@
 # TODO List
 
-1. Import products from XLS for quotation.
 2. Ensure that the modal for adding products to the cart and changing them appears in a modal.
 3. Add an option to generate invoices for boxes with notes of coffee.
 4. Generate invoices for boxes with notes of coffee in another café.

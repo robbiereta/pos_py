@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 import requests
 from routes.export import export_bp
 from routes.invoice_ocr import invoice_ocr_bp
+from routes.products import products_bp
 import pytesseract
 from PIL import Image
 import io
@@ -39,6 +40,7 @@ def create_app(config_name='default'):
     app.register_blueprint(clients_bp)
     app.register_blueprint(export_bp)
     app.register_blueprint(invoice_ocr_bp)
+    app.register_blueprint(products_bp)
 
     # Configuración para subida de imágenes
     UPLOAD_FOLDER = 'static/remisiones'

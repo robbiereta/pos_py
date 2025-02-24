@@ -10,6 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    {% block head %}{% endblock %}
     <style>
         .modal-backdrop {
             z-index: 1040;
@@ -43,6 +44,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('invoice_ocr.invoice_ocr') }}">
                     <i class="fas fa-file-invoice"></i> Convertir Facturas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('products.list_products') }}">
+                    <i class="fas fa-box"></i> Productos
                 </a>
             </li>
         </ul>
