@@ -33,28 +33,73 @@ document.addEventListener('DOMContentLoaded', function() {
             loadProducts();
         });
     }
+    
+    // Load products initially if we're on the product management tab
+    if (document.getElementById('productsTableBody')) {
+        loadProducts();
+    }
+    
+    // Configure track stock checkbox
+    const trackStockCheckbox = document.getElementById('trackStock');
+    if (trackStockCheckbox) {
+        trackStockCheckbox.addEventListener('change', function() {
+            toggleStockField(this.checked);
+        });
+    }
 });
 
+// Function to toggle stock field visibility
+function toggleStockField(show) {
+    const stockContainer = document.getElementById('stockFieldContainer');
+    if (stockContainer) {
+        stockContainer.style.display = show ? 'block' : 'none';
+        
+        // If not tracking stock, set value to 0
+        if (!show) {
+            document.getElementById('productStock').value = '0';
+        }
+    }
+}
+
 function loadProducts(searchQuery = '') {
+    console.log('Cargando productos con búsqueda:', searchQuery);
     fetch(`/api/products?q=${encodeURIComponent(searchQuery)}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
         .then(products => {
             const tbody = document.getElementById('productsTableBody');
+            if (!tbody) {
+                console.error('No se encontró el elemento productsTableBody');
+                return;
+            }
+            
             tbody.innerHTML = '';
+            
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay productos</td></tr>';
+                return;
+            }
             
             products.forEach(product => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${product.sku || '-'}</td>
                     <td>${product.name}</td>
-                    <td>$${product.price.toFixed(2)}</td>
+                    <td>$${parseFloat(product.price).toFixed(2)}</td>
+                    <td>${product.track_stock ? (product.stock || 0) : 'Sin contar'}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary me-1" onclick="editProduct('${product._id}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteProduct('${product._id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="openProductModal('${product._id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteProduct('${product._id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -62,57 +107,100 @@ function loadProducts(searchQuery = '') {
         })
         .catch(error => {
             console.error('Error loading products:', error);
-            showNotification('Error al cargar productos', 'error');
+            alert('Error al cargar los productos. Por favor, inténtalo de nuevo.');
         });
 }
 
 function openProductModal(productId = null) {
+    console.log('Abriendo modal de producto con ID:', productId);
     currentProductId = productId;
-    const form = document.getElementById('productForm');
-    form.reset();
+    
+    // Clear form
+    document.getElementById('productName').value = '';
+    document.getElementById('productSku').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('productStock').value = '0';
+    document.getElementById('trackStock').checked = true;
+    
+    // Show stock field by default
+    toggleStockField(true);
+    
+    // Change modal title based on mode (add/edit)
+    const modalTitle = document.querySelector('#productModal .modal-title');
     
     if (productId) {
-        // Edit mode
-        document.getElementById('productModalTitle').textContent = 'Editar Producto';
+        modalTitle.textContent = 'Editar Producto';
+        
+        // Fetch product data
         fetch(`/api/products/${productId}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
             .then(product => {
                 document.getElementById('productName').value = product.name;
                 document.getElementById('productSku').value = product.sku || '';
                 document.getElementById('productPrice').value = product.price;
+                document.getElementById('productStock').value = product.stock || 0;
+                
+                // Set track stock checkbox
+                const trackStockCheckbox = document.getElementById('trackStock');
+                if (trackStockCheckbox) {
+                    const trackStock = product.track_stock !== undefined ? product.track_stock : true;
+                    trackStockCheckbox.checked = trackStock;
+                    toggleStockField(trackStock);
+                }
             })
             .catch(error => {
-                console.error('Error loading product:', error);
-                showNotification('Error al cargar el producto', 'error');
+                console.error('Error loading product details:', error);
+                alert('Error al cargar los detalles del producto.');
+                if (productModal) productModal.hide();
             });
     } else {
-        // Create mode
-        document.getElementById('productModalTitle').textContent = 'Nuevo Producto';
+        modalTitle.textContent = 'Agregar Producto';
     }
     
-    productModal.show();
+    if (productModal) {
+        productModal.show();
+    } else {
+        console.error('Modal no inicializado');
+        alert('Error al abrir el modal. Por favor, recarga la página.');
+    }
 }
 
 function saveProduct() {
-    const productData = {
-        name: document.getElementById('productName').value.trim(),
-        sku: document.getElementById('productSku').value.trim(),
-        price: parseFloat(document.getElementById('productPrice').value)
-    };
+    const name = document.getElementById('productName').value.trim();
+    const sku = document.getElementById('productSku').value.trim();
+    const price = parseFloat(document.getElementById('productPrice').value) || 0;
+    const trackStock = document.getElementById('trackStock').checked;
+    const stock = parseInt(document.getElementById('productStock').value) || 0;
     
-    if (!productData.name) {
-        showNotification('El nombre del producto es requerido', 'error');
+    if (!name) {
+        alert('El nombre del producto es obligatorio.');
         return;
     }
     
-    const url = currentProductId ? 
-        `/api/products/${currentProductId}` : 
-        '/api/products';
+    const productData = {
+        name,
+        sku,
+        price,
+        stock,
+        track_stock: trackStock
+    };
+    
+    const url = currentProductId 
+        ? `/api/products/${currentProductId}`
+        : '/api/products';
         
     const method = currentProductId ? 'PUT' : 'POST';
     
+    console.log('Guardando producto con método:', method);
+    console.log('Datos del producto:', productData);
+    
     fetch(url, {
-        method: method,
+        method,
         headers: {
             'Content-Type': 'application/json'
         },
@@ -120,46 +208,47 @@ function saveProduct() {
     })
     .then(response => {
         if (!response.ok) {
-            return response.json().then(err => Promise.reject(err));
+            return response.json().then(err => { 
+                throw new Error(err.error || 'Error al guardar el producto');
+            });
         }
         return response.json();
     })
-    .then(product => {
-        productModal.hide();
+    .then(data => {
+        if (productModal) productModal.hide();
         loadProducts();
-        showNotification(
-            currentProductId ? 
-            'Producto actualizado exitosamente' : 
-            'Producto creado exitosamente',
-            'success'
-        );
+        alert(currentProductId ? 'Producto actualizado con éxito' : 'Producto creado con éxito');
     })
     .catch(error => {
         console.error('Error saving product:', error);
-        showNotification(error.error || 'Error al guardar el producto', 'error');
+        alert(error.message || 'Error al guardar el producto. Por favor, inténtalo de nuevo.');
     });
 }
 
 function deleteProduct(productId) {
-    if (!confirm('¿Está seguro de que desea eliminar este producto?')) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
         return;
     }
+    
+    console.log('Eliminando producto con ID:', productId);
     
     fetch(`/api/products/${productId}`, {
         method: 'DELETE'
     })
     .then(response => {
         if (!response.ok) {
-            return response.json().then(err => Promise.reject(err));
+            return response.json().then(err => { 
+                throw new Error(err.error || 'Error al eliminar el producto');
+            });
         }
         return response.json();
     })
-    .then(() => {
+    .then(data => {
         loadProducts();
-        showNotification('Producto eliminado exitosamente', 'success');
+        alert('Producto eliminado con éxito');
     })
     .catch(error => {
         console.error('Error deleting product:', error);
-        showNotification(error.error || 'Error al eliminar el producto', 'error');
+        alert(error.message || 'Error al eliminar el producto. Por favor, inténtalo de nuevo.');
     });
 }

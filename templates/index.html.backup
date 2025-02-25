@@ -374,53 +374,9 @@
                 </div>
             </div>
 
+
             <!-- Client Management Tab -->
             <div class="tab-pane fade" id="clients" role="tabpanel">
-                <div class="container-fluid mt-4">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h2>Gestión de Clientes</h2>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <button class="btn btn-primary" onclick="openClientModal()">
-                                <i class="fas fa-plus"></i> Nuevo Cliente
-                            </button>
-                        </div>
-                    </div>
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-search"></i>
-                                </span>
-                                <input type="text" class="form-control" id="clientSearch" 
-                                       placeholder="Buscar clientes por nombre, email, teléfono o RFC...">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre</th>
-                                            <th>Email</th>
-                                            <th>Teléfono</th>
-                                            <th>RFC</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="clientsTableBody">
-                                        <!-- Clients will be loaded here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Product Management Tab -->
             <div class="tab-pane fade" id="product" role="tabpanel">
                 <div class="container-fluid mt-4">
@@ -454,7 +410,6 @@
                                             <th>SKU</th>
                                             <th>Nombre</th>
                                             <th>Precio</th>
-                                            <th>Stock</th>
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
@@ -462,6 +417,555 @@
                                         <!-- Products will be loaded here -->
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="container-fluid mt-4">
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                    <div class="row">
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                        <div class="col-12">
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                            <div class="card">
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                                <div class="card-body">
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                                        <h5 class="card-title">Gestión de Clientes</h5>
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                                        <button class="btn btn-primary" onclick="openClientModal()">
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                                            <i class="fas fa-plus"></i> Nuevo Cliente
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                                        </button>
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                                    </div>
+            <!-- Product Management Tab -->
+            <div class="tab-pane fade" id="product" role="tabpanel">
+                <div class="container-fluid mt-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2>Gestión de Productos</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="productSearchInput" 
+                                       placeholder="Buscar productos por nombre o SKU...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                                    
+                                    <!-- Search Bar -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="clientSearch" 
+                                                       placeholder="Buscar por nombre, email, teléfono o RFC...">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="searchClients()">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Clients Table -->
+                                    <div id="clientsLoading" class="text-center d-none">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Cargando...</span>
+                                        </div>
+                                        <p class="mt-2">Cargando clientes...</p>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table" id="clientsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Email</th>
+                                                    <th>Teléfono</th>
+                                                    <th>RFC</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Clients will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -482,19 +986,7 @@
                     <form id="addProductForm">
                         <input type="text" class="form-control mb-2" id="productName" placeholder="Nombre del Producto" required>
                         <input type="number" class="form-control mb-2" id="productPrice" placeholder="Precio" step="0.01" required>
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="trackStock" checked>
-                                <label class="form-check-label" for="trackStock">
-                                    Contar stock (activar seguimiento de inventario)
-                                </label>
-                            </div>
-                        </div>
-                        <div class="mb-3" id="stockFieldContainer">
-                            <label for="productStock" class="form-label">Stock*</label>
-                            <input type="number" class="form-control" id="productStock" 
-                                   step="1" min="0" required>
-                        </div>
+                        <input type="number" class="form-control mb-2" id="productStock" placeholder="Stock" required>
                         <button type="submit" class="btn btn-primary">Guardar</button>
                     </form>
                 </div>
@@ -609,19 +1101,6 @@
                                        step="0.01" min="0" required>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="trackStock" checked>
-                                <label class="form-check-label" for="trackStock">
-                                    Contar stock (activar seguimiento de inventario)
-                                </label>
-                            </div>
-                        </div>
-                        <div class="mb-3" id="stockFieldContainer">
-                            <label for="productStock" class="form-label">Stock*</label>
-                            <input type="number" class="form-control" id="productStock" 
-                                   step="1" min="0" required>
-                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -732,12 +1211,6 @@
 
             // Función para seleccionar un producto
             window.selectProduct = function(product) {
-                // Asegurarse de que track_stock esté correctamente definido
-                if (product.track_stock === undefined) {
-                    // Si no está definido, asumimos que es false (sin contar) porque ejecutamos el script de actualización
-                    product.track_stock = false;
-                }
-                
                 selectedProduct = product;
                 const card = document.getElementById('selectedProductCard');
                 if (!card) {
@@ -748,25 +1221,10 @@
                 card.style.display = 'block';
                 document.getElementById('selectedProductName').textContent = product.name;
                 document.getElementById('selectedProductPrice').textContent = product.price.toFixed(2);
-                
-                // Mostrar stock según si se rastrea o no
-                const stockElement = document.getElementById('selectedProductStock');
-                if (product.track_stock === false) {
-                    stockElement.textContent = 'Sin contar';
-                } else {
-                    stockElement.textContent = product.stock;
-                }
-                
+                document.getElementById('selectedProductStock').textContent = product.stock;
                 document.getElementById('selectedProductImage').src = product.image_url || '/static/placeholder.png';
                 document.getElementById('selectedProductQuantity').value = 1;
-                
-                // Solo establecer max si se rastrea el stock
-                const quantityInput = document.getElementById('selectedProductQuantity');
-                if (product.track_stock === false) {
-                    quantityInput.removeAttribute('max');
-                } else {
-                    quantityInput.max = product.stock;
-                }
+                document.getElementById('selectedProductQuantity').max = product.stock;
             }
 
             // Función para actualizar la tabla del carrito
@@ -782,8 +1240,8 @@
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${item.name}</td>
-                        <td>${item.quantity}</td>
                         <td>$${item.price.toFixed(2)}</td>
+                        <td>${item.quantity}</td>
                         <td>$${(item.price * item.quantity).toFixed(2)}</td>
                         <td>
                             <button class="btn btn-danger btn-sm" onclick="removeFromCart(${index})">
@@ -814,12 +1272,6 @@
                     return;
                 }
 
-                // Asegurarse de que track_stock esté correctamente definido
-                if (selectedProduct.track_stock === undefined) {
-                    // Si no está definido, asumimos que es false (sin contar) porque ejecutamos el script de actualización
-                    selectedProduct.track_stock = false;
-                }
-
                 const quantityInput = document.getElementById('selectedProductQuantity');
                 if (!quantityInput) {
                     console.error('Elemento selectedProductQuantity no encontrado');
@@ -827,14 +1279,8 @@
                 }
 
                 const quantity = parseInt(quantityInput.value);
-                if (isNaN(quantity) || quantity < 1) {
-                    alert('Por favor ingrese una cantidad válida mayor a cero.');
-                    return;
-                }
-                
-                // Solo validar stock si el producto tiene seguimiento de inventario
-                if (selectedProduct.track_stock !== false && quantity > selectedProduct.stock) {
-                    alert('No se puede agregar esta cantidad. Stock disponible: ' + selectedProduct.stock);
+                if (quantity < 1 || quantity > selectedProduct.stock) {
+                    alert('Cantidad inválida');
                     return;
                 }
 
@@ -842,10 +1288,8 @@
                 const existingItem = cart.find(item => item.id === selectedProduct.id);
                 if (existingItem) {
                     const newQuantity = existingItem.quantity + quantity;
-                    // Solo validar stock si el producto tiene seguimiento de inventario
-                    if (selectedProduct.track_stock !== false && newQuantity > selectedProduct.stock) {
-                        alert('No se puede agregar esta cantidad. Ya tienes ' + existingItem.quantity + 
-                              ' unidades en el carrito y solo hay ' + selectedProduct.stock + ' disponibles.');
+                    if (newQuantity > selectedProduct.stock) {
+                        alert('No hay suficiente stock');
                         return;
                     }
                     existingItem.quantity = newQuantity;
@@ -854,8 +1298,7 @@
                         id: selectedProduct.id,
                         name: selectedProduct.name,
                         price: selectedProduct.price,
-                        quantity: quantity,
-                        track_stock: selectedProduct.track_stock
+                        quantity: quantity
                     });
                 }
 
