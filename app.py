@@ -34,11 +34,13 @@ def create_app(config_name='default'):
     # Import models
     from models import Sale, Product, Client, GlobalInvoice
     from routes.clients import clients_bp
+    from routes.products import bp as products_bp
     
     # Register blueprints
     app.register_blueprint(clients_bp)
     app.register_blueprint(export_bp)
     app.register_blueprint(invoice_ocr_bp)
+    app.register_blueprint(products_bp)
 
     # Configuración para subida de imágenes
     UPLOAD_FOLDER = 'static/remisiones'
