@@ -1,0 +1,45 @@
+<!-- Product Management Tab -->
+<div class="tab-pane fade" id="product" role="tabpanel">
+    <div class="container-fluid mt-4">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2>Gestión de Productos</h2>
+            </div>
+            <div class="col-md-6 text-end">
+                <button class="btn btn-primary" onclick="openProductModal()">
+                    <i class="fas fa-plus"></i> Nuevo Producto
+                </button>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="productSearchInput" 
+                           placeholder="Buscar productos por nombre o SKU...">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <!-- Products will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

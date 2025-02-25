@@ -29,7 +29,6 @@ def create_app(config_name='default'):
     
     # Initialize MongoDB
     mongo = init_db(app)
-    app.db = mongo.db  # Add db instance to app context
     
     # Import models
     from models import Sale, Product, Client, GlobalInvoice

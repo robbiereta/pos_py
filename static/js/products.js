@@ -5,7 +5,14 @@ let currentProductId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize product modal
-    productModal = new bootstrap.Modal(document.getElementById('productModal'));
+    const modalElement = document.getElementById('productModal');
+    if (modalElement && typeof bootstrap !== 'undefined') {
+        try {
+            productModal = new bootstrap.Modal(modalElement);
+        } catch (error) {
+            console.error('Error initializing product modal:', error);
+        }
+    }
     
     // Initialize search input
     const searchInput = document.getElementById('productSearchInput');
