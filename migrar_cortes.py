@@ -14,6 +14,44 @@ def migrar_cortes_a_mongo():
             sqlite_conn = sqlite3.connect('pos.db')
             cursor = sqlite_conn.cursor()
             
+            # Crear tabla si no existe
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS cortes_caja (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    monto_inicial DECIMAL(10,2) DEFAULT 0,
+                    monto_final DECIMAL(10,2) DEFAULT 0,
+                    ventas_efectivo DECIMAL(10,2) DEFAULT 0,
+                    ventas_tarjeta DECIMAL(10,2) DEFAULT 0,
+                    ventas_transferencia DECIMAL(10,2) DEFAULT 0,
+                    retiros DECIMAL(10,2) DEFAULT 0,
+                    notas TEXT
+                )
+            ''')
+            sqlite_conn.commit()
+            
+            # Insertar un corte de ejemplo si no hay ninguno
+            cursor.execute('SELECT COUNT(*) FROM cortes_caja')
+            if cursor.fetchone()[0] == 0:
+                print("\nCreando corte de ejemplo...")
+                cursor.execute('''
+                    INSERT INTO cortes_caja (
+                        fecha_hora, monto_inicial, monto_final, 
+                        ventas_efectivo, ventas_tarjeta, ventas_transferencia,
+                        retiros, notas
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    '2025-03-08 13:19:37.654710',
+                    1000.00,
+                    14789.00,
+                    14789.00,
+                    0.00,
+                    0.00,
+                    0.00,
+                    'Corte de ejemplo'
+                ))
+                sqlite_conn.commit()
+            
             # Obtener los cortes de SQLite
             cursor.execute('''
                 SELECT id, fecha_hora, monto_inicial, monto_final, 
