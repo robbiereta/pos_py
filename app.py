@@ -17,6 +17,7 @@ from PIL import Image
 import io
 from bson import ObjectId
 from pymongo import MongoClient
+import unittest
 
 # Load environment variables
 load_dotenv()
@@ -213,17 +214,31 @@ def create_app(config_name='default'):
     def create_sale():
         data = request.json
         db = get_db()
+        cliente_default = db.clients.find_one({"name": "Cliente General"})
+        if not cliente_default:
+                cliente_default = Client.create_client(
+                    db,
+                    name="Cliente General",
+                    email="general@example.com",
+                    phone="0000000000"
+                )
+
+
+       # Todas las ventas son en efectivo
+        metodo_pago = 'efectivo'
+                                    
+                                    # Crear la venta
+        venta = {
+                                        'timestamp': fecha,
+                                        'total': str(monto_float),
+                                        'payment_method': metodo_pago,
+                                        'client_id': str(cliente_default['_id']),
+                                        'products': [str(producto_default['_id'])]
+                                    }
         
-        # Create the sale
-        sale = Sale.create_sale(
-            db,
-            client_id=data['client_id'],
-            total_amount=data['total_amount'],
-            amount_received=data['amount_received'],
-            change_amount=data['change_amount'],
-            details=data['details']
-        )
-        
+         # Guardar en MongoDB
+        db.sales.insert_one(venta)
+                                    
         # Update product stock
         for detail in data['details']:
             product = Product.get_by_id(db, detail['product_id'])
@@ -268,6 +283,34 @@ def create_app(config_name='default'):
         return jsonify({"error": "Client not found"}), 404
 
     return app
+
+class TestCreateSale(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app('default')
+        self.app.config['TESTING'] = True
+        self.client = self.app.test_client()
+
+    def test_create_sale(self):
+        # Prepare data
+        data = {
+            'client_id': '',
+            'total_amount': 100,
+            'amount_received': 100,
+            'change_amount': 0,
+            'details': [
+                {'product_id': 'product_id', 'quantity': 1}
+            ]
+        }
+
+        # Call the create_sale function
+        response = self.client.post('/api/sales', json=data)
+
+        # Assert expected outcomes
+        self.assertEqual(response.status_code, 201)
+        self.assertIsNotNone(response.json)
+
+if __name__ == '__main__':
+    unittest.main()
 
 if __name__ == '__main__':
     app = create_app(os.getenv('FLASK_ENV', 'default'))
