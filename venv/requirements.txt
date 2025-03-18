@@ -10,3 +10,20 @@ termcolor>=2.4.0,<3
 wcwidth>=0.2.13,<0.3
 PyYAML>=5.3.1,<6.1 # use the same range that 'aws-cli' uses
 urllib3>=1.26.5,<2
+Flask==2.3.3
+pymongo==4.6.1
+flask-pymongo==2.3.0
+python-dotenv==1.0.0
+reportlab==3.6.12  # PDF invoice generation
+qrcode==7.3.1  # For generating QR codes on invoices
+gunicorn==21.2.0
+python-dateutil==2.8.2
+Werkzeug==2.3.7
+pytest==8.3.4
+pytest-cov==6.0.0
+pytesseract==0.3.10    # OCR functionality
+Pillow==10.0.0        # Image processing
+pandas         # Data manipulation
+openpyxl==3.1.2      # Excel file handling
+opencv-python==4.11.0.86
+numpy
