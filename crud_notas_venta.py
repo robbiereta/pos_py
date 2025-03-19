@@ -8,6 +8,9 @@ from models import Sale, Client, SaleDetail, Product
 import os
 from dotenv import load_dotenv
 from config import config
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import xml.etree.ElementTree as ET
 
 # Load environment variables
 load_dotenv()
@@ -22,10 +25,11 @@ nota_venta = {
         {
             "product_id": "",
             "quantity": 1,
-            "price": 0.0
+            "price": 0.0,
+            "nombre": "Producto de prueba"
         }
     ],
-    "fecha": "",    
+    "fecha": datetime.now().strftime("%Y-%m-%d"),    
     "total": 0.0,
     "metodo_pago": "efectivo"
 }
@@ -56,6 +60,27 @@ def create_app():
         print(f"Error initializing MongoDB: {str(e)}")
         raise
 
+def generar_factura(cliente, productos, total, fecha):
+    # Crear un archivo PDF
+    factura_nombre = f"factura_{cliente['name_cliente']}_{fecha}.pdf"
+    c = canvas.Canvas(factura_nombre, pagesize=letter)
+    
+    # Agregar contenido a la factura
+    c.drawString(100, 750, f"Factura para: {cliente['name_cliente']}")
+    c.drawString(100, 730, f"Fecha: {fecha}")
+    c.drawString(100, 710, "Productos:")
+    
+    y = 690
+    for producto in productos:
+        c.drawString(100, y, f"- {producto['nombre']} (Cantidad: {producto['quantity']}, Precio: {producto['price']})")
+        y -= 20
+    
+    c.drawString(100, y, f"Total: {total}")
+    
+    # Guardar el PDF
+    c.save()
+    print(f"Factura generada: {factura_nombre}")
+
 def guardar_venta(nota_venta):
     # Crear la aplicación y el contexto
     app = create_app()
@@ -70,18 +95,18 @@ def guardar_venta(nota_venta):
             
        
             # Obtener o crear cliente por defecto
-            cliente = db.clients.find_one({"name": nota_venta.cliente.name_cliente})
+            cliente = db.clients.find_one({"name": nota_venta["cliente"]["name_cliente"]})
             if not cliente:
                 cliente = Client.create_client(
                     db,
-                    name=nota_venta.cliente.name_cliente,
-                    phone=nota_venta.cliente.phone,
-                    rfc=nota_venta.cliente.rfc,
-                    address=nota_venta.cliente.address
+                    name=nota_venta["cliente"]["name_cliente"],
+                    phone=nota_venta["cliente"]["phone"],
+                    rfc=nota_venta["cliente"]["rfc"],
+                    address=nota_venta["cliente"]["address"]
                 )
 
             # Obtener  productos
-            lineas_venta = nota_venta.lineas_venta
+            lineas_venta = nota_venta["lineas_venta"]
             # if not producto:
             #     producto = Product.create_product(
             #         db,
@@ -99,10 +124,10 @@ def guardar_venta(nota_venta):
             
             # Crear la venta
             venta = {
-                'timestamp': nota_venta.fecha,
-                'amount': nota_venta.total,
-                'payment_method': nota_venta.metodo_pago,
-                'client_id': str(cliente),
+                'timestamp': nota_venta["fecha"],
+                'amount': nota_venta["total"],
+                'payment_method': nota_venta["metodo_pago"],
+                'client_id': str(cliente["_id"]),
                 'products': lineas_venta
             }
                                     
@@ -111,11 +136,142 @@ def guardar_venta(nota_venta):
                                     
             if (result.inserted_id):
                 print("Venta guardada exitosamente")
+                generar_factura(nota_venta["cliente"], nota_venta["lineas_venta"], nota_venta["total"], nota_venta["fecha"])
                 return {'status': 'success', 'message': 'Venta guardada exitosamente'}
         except Exception as e:
             print(f"Error al guardar la venta: {str(e)}")
             return {'status': 'error', 'message': str(e)}
          
+def guardar_cfdi(cfdi_data):
+    app = create_app()
+    with app.app_context():
+        try:
+            db = app.db
+            cfdi = {
+                'emisor': cfdi_data['emisor'],
+                'receptor': cfdi_data['receptor'],
+                'fecha': cfdi_data['fecha'],
+                'total': cfdi_data['total'],
+                'uuid': cfdi_data['uuid'],
+                'xml': cfdi_data['xml'],
+                'pdf': None
+            }
+            result = db.cfdi.insert_one(cfdi)
+            if result.inserted_id:
+                print("CFDI guardado exitosamente")
+                generar_cfdi_pdf(cfdi)
+                return {'status': 'success', 'message': 'CFDI guardado exitosamente'}
+        except Exception as e:
+            print(f"Error al guardar CFDI: {str(e)}")
+            return {'status': 'error', 'message': str(e)}
+
+def guardar_nomina(nomina_data):
+    app = create_app()
+    with app.app_context():
+        try:
+            db = app.db
+            nomina = {
+                'empleado': nomina_data['empleado'],
+                'fecha_pago': nomina_data['fecha_pago'],
+                'percepciones': nomina_data['percepciones'],
+                'deducciones': nomina_data['deducciones'],
+                'total': nomina_data['total'],
+                'pdf': None
+            }
+            result = db.nominas.insert_one(nomina)
+            if result.inserted_id:
+                print("Nómina guardada exitosamente")
+                generar_nomina_pdf(nomina)
+                return {'status': 'success', 'message': 'Nómina guardada exitosamente'}
+        except Exception as e:
+            print(f"Error al guardar nómina: {str(e)}")
+            return {'status': 'error', 'message': str(e)}
+
+def generar_cfdi_pdf(cfdi):
+    factura_nombre = f"cfdi_{cfdi['emisor']['rfc']}_{cfdi['fecha']}.pdf"
+    c = canvas.Canvas(factura_nombre, pagesize=letter)
+    c.drawString(100, 750, f"CFDI Emisor: {cfdi['emisor']['nombre']}")
+    c.drawString(100, 730, f"Receptor: {cfdi['receptor']['nombre']}")
+    c.drawString(100, 710, f"Fecha: {cfdi['fecha']}")
+    c.drawString(100, 690, f"Total: {cfdi['total']}")
+    c.drawString(100, 670, f"UUID: {cfdi['uuid']}")
+    c.save()
+    print(f"CFDI PDF generado: {factura_nombre}")
+
+def generar_nomina_pdf(nomina):
+    factura_nombre = f"nomina_{nomina['empleado']['rfc']}_{nomina['fecha_pago']}.pdf"
+    c = canvas.Canvas(factura_nombre, pagesize=letter)
+    c.drawString(100, 750, f"Nómina para: {nomina['empleado']['nombre']}")
+    c.drawString(100, 730, f"Fecha de pago: {nomina['fecha_pago']}")
+    c.drawString(100, 710, f"Percepciones: {nomina['percepciones']}")
+    c.drawString(100, 690, f"Deducciones: {nomina['deducciones']}")
+    c.drawString(100, 670, f"Total: {nomina['total']}")
+    c.save()
+    print(f"Nómina PDF generada: {factura_nombre}")
+
+def generar_xml_nomina(nomina_data):
+    # Create the root element with namespaces
+    root = ET.Element('cfdi:Comprobante', {
+        'xmlns:cfdi': 'http://www.sat.gob.mx/cfd/3',
+        'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+        'xsi:schemaLocation': 'http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv33.xsd',
+        'Version': '3.3',
+        'Serie': 'A',
+        'Folio': '1',
+        'Fecha': nomina_data['fecha_pago'],
+        'FormaPago': '99',
+        'NoCertificado': '00001000000403258748',
+        'Certificado': '',
+        'SubTotal': str(nomina_data['percepciones']),
+        'Descuento': str(nomina_data['deducciones']),
+        'Moneda': 'MXN',
+        'Total': str(nomina_data['total']),
+        'TipoDeComprobante': 'N',
+        'MetodoPago': 'PUE',
+        'LugarExpedicion': '45000'
+    })
+
+    # Add Emisor
+    emisor = ET.SubElement(root, 'cfdi:Emisor', {
+        'Rfc': nomina_data['empleado']['rfc'],
+        'Nombre': nomina_data['empleado']['nombre'],
+        'RegimenFiscal': '601'
+    })
+
+    # Add Receptor
+    receptor = ET.SubElement(root, 'cfdi:Receptor', {
+        'Rfc': 'XAXX010101000',
+        'Nombre': 'Publico en General',
+        'UsoCFDI': 'G03'
+    })
+
+    # Add Conceptos
+    conceptos = ET.SubElement(root, 'cfdi:Conceptos')
+    concepto = ET.SubElement(conceptos, 'cfdi:Concepto', {
+        'ClaveProdServ': '84111505',
+        'Cantidad': '1',
+        'ClaveUnidad': 'ACT',
+        'Descripcion': 'Pago de nómina',
+        'ValorUnitario': str(nomina_data['percepciones']),
+        'Importe': str(nomina_data['percepciones'])
+    })
+
+    # Convert to string
+    xml_str = ET.tostring(root, encoding='utf-8').decode('utf-8')
+    return xml_str
+
+# Example usage
+nomina_data_example = {
+    "empleado": {"nombre": "Empleado Ejemplo", "rfc": "XAXX010101000"},
+    "fecha_pago": "2025-03-18T10:00:00",
+    "percepciones": 1000.0,
+    "deducciones": 200.0,
+    "total": 800.0
+}
+xml_output = generar_xml_nomina(nomina_data_example)
+print(xml_output)
+
 if __name__ == "__main__":
+    nota_venta["total"] = nota_venta["lineas_venta"][0]["price"] * nota_venta["lineas_venta"][0]["quantity"]
     resultado = guardar_venta(nota_venta)
     print(f"\nEstado final: {resultado['status']}")

@@ -189,3 +189,50 @@ class GlobalInvoice:
     @staticmethod
     def get_by_id(db, invoice_id):
         return db.global_invoices.find_one({"_id": ObjectId(invoice_id)})
+
+class Employee:
+    @staticmethod
+    def create_employee(db, nombreCompleto, rfc, curp, numeroSeguridadSocial, codigoPostal, fechaIngreso, regimenContratacion, tipoContrato, tipoJornada, salarioBaseCotizacion, salarioDiarioIntegrado, periodicidadPago, riesgoPuesto, departamento, puesto, banco=None, cuentaBancaria=None, correoElectronico=None, telefono=None):
+        employee = {
+            "nombreCompleto": nombreCompleto,
+            "rfc": rfc,
+            "curp": curp,
+            "numeroSeguridadSocial": numeroSeguridadSocial,
+            "codigoPostal": codigoPostal,
+            "fechaIngreso": fechaIngreso,
+            "regimenContratacion": regimenContratacion,
+            "tipoContrato": tipoContrato,
+            "tipoJornada": tipoJornada,
+            "salarioBaseCotizacion": salarioBaseCotizacion,
+            "salarioDiarioIntegrado": salarioDiarioIntegrado,
+            "periodicidadPago": periodicidadPago,
+            "riesgoPuesto": riesgoPuesto,
+            "departamento": departamento,
+            "puesto": puesto,
+            "banco": banco,
+            "cuentaBancaria": cuentaBancaria,
+            "correoElectronico": correoElectronico,
+            "telefono": telefono,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        result = db.employees.insert_one(employee)
+        employee['_id'] = result.inserted_id
+        return employee
+
+    @staticmethod
+    def get_by_id(db, employee_id):
+        return db.employees.find_one({"_id": ObjectId(employee_id)})
+
+    @staticmethod
+    def update_employee(db, employee_id, **kwargs):
+        kwargs['updated_at'] = datetime.utcnow()
+        db.employees.update_one(
+            {"_id": ObjectId(employee_id)},
+            {"$set": kwargs}
+        )
+        return db.employees.find_one({"_id": ObjectId(employee_id)})
+
+    @staticmethod
+    def delete_employee(db, employee_id):
+        return db.employees.delete_one({"_id": ObjectId(employee_id)})

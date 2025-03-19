@@ -320,5 +320,7 @@ class CFDIGenerator:
         except Exception as e:
             raise Exception(f"Error generating Global CFDI: {str(e)}")
 
+    
+
 # Create singleton instances for different modes
 cfdi_generator = CFDIGenerator(test_mode=False) 

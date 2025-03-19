@@ -146,3 +146,67 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+import unittest
+from api import app
+import json
+
+class TestAPI(unittest.TestCase):
+    def setUp(self):
+        self.app = app.test_client()
+        self.app.testing = True
+
+    def test_get_ventas(self):
+        response = self.app.get('/api/ventas')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json, list)
+
+    def test_create_venta(self):
+        venta_data = {
+            "timestamp": "2025-03-18T10:00:00",
+            "amount": 100.0,
+            "payment_method": "cash",
+            "client_id": "some_client_id",
+            "products": []
+        }
+        response = self.app.post('/api/ventas', data=json.dumps(venta_data), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('id', response.json)
+
+    def test_get_cfdi(self):
+        response = self.app.get('/api/cfdi')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json, list)
+
+    def test_create_cfdi(self):
+        cfdi_data = {
+            "emisor": {"nombre": "Emisor", "rfc": "XAXX010101000"},
+            "receptor": {"nombre": "Receptor", "rfc": "XEXX010101000"},
+            "fecha": "2025-03-18T10:00:00",
+            "total": 100.0,
+            "uuid": "some-uuid",
+            "xml": "<xml></xml>"
+        }
+        response = self.app.post('/api/cfdi', data=json.dumps(cfdi_data), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('id', response.json)
+
+    def test_get_nominas(self):
+        response = self.app.get('/api/nominas')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json, list)
+
+    def test_create_nomina(self):
+        nomina_data = {
+            "empleado": {"nombre": "Empleado", "rfc": "XAXX010101000"},
+            "fecha_pago": "2025-03-18T10:00:00",
+            "percepciones": 1000.0,
+            "deducciones": 200.0,
+            "total": 800.0
+        }
+        response = self.app.post('/api/nominas', data=json.dumps(nomina_data), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('id', response.json)
+
+if __name__ == '__main__':
+    unittest.main()
