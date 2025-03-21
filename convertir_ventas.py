@@ -91,7 +91,7 @@ def convertir_e_importar_ventas(archivo_origen):
                     try:
                         # Convertir la fecha a datetime
                         if isinstance(fecha_str, str):
-                            fecha = datetime.strptime(fecha_str.split()[0], '%Y-%m-%d')
+                            fecha = datetime.strptime(fecha_str.split()[0], '%d-%m-%Y')
                         else:
                             fecha = fecha_str.replace(hour=0, minute=0, second=0, microsecond=0)
                         
@@ -162,6 +162,6 @@ def convertir_e_importar_ventas(archivo_origen):
             return {'status': 'error'}
 
 if __name__ == "__main__":
-    archivo_origen = "_ventas_marzo25_1sem.xlsx"
+    archivo_origen = "ventas_marzo_2semana.xlsx"
     resultado = convertir_e_importar_ventas(archivo_origen)
     print(f"\nEstado final: {resultado['status']}")

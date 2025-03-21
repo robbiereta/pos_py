@@ -125,4 +125,4 @@ def generar_factura_semanal(fecha_inicio_str):
 
 if __name__ == "__main__":
     # Generar factura para la primera semana de marzo 2025
-    generar_factura_semanal('2025-03-01')
+    generar_factura_semanal('2025-03-08')

@@ -165,49 +165,6 @@ def guardar_cfdi(cfdi_data):
             print(f"Error al guardar CFDI: {str(e)}")
             return {'status': 'error', 'message': str(e)}
 
-def guardar_nomina(nomina_data):
-    app = create_app()
-    with app.app_context():
-        try:
-            db = app.db
-            nomina = {
-                'empleado': nomina_data['empleado'],
-                'fecha_pago': nomina_data['fecha_pago'],
-                'percepciones': nomina_data['percepciones'],
-                'deducciones': nomina_data['deducciones'],
-                'total': nomina_data['total'],
-                'pdf': None
-            }
-            result = db.nominas.insert_one(nomina)
-            if result.inserted_id:
-                print("Nómina guardada exitosamente")
-                generar_nomina_pdf(nomina)
-                return {'status': 'success', 'message': 'Nómina guardada exitosamente'}
-        except Exception as e:
-            print(f"Error al guardar nómina: {str(e)}")
-            return {'status': 'error', 'message': str(e)}
-
-def generar_cfdi_pdf(cfdi):
-    factura_nombre = f"cfdi_{cfdi['emisor']['rfc']}_{cfdi['fecha']}.pdf"
-    c = canvas.Canvas(factura_nombre, pagesize=letter)
-    c.drawString(100, 750, f"CFDI Emisor: {cfdi['emisor']['nombre']}")
-    c.drawString(100, 730, f"Receptor: {cfdi['receptor']['nombre']}")
-    c.drawString(100, 710, f"Fecha: {cfdi['fecha']}")
-    c.drawString(100, 690, f"Total: {cfdi['total']}")
-    c.drawString(100, 670, f"UUID: {cfdi['uuid']}")
-    c.save()
-    print(f"CFDI PDF generado: {factura_nombre}")
-
-def generar_nomina_pdf(nomina):
-    factura_nombre = f"nomina_{nomina['empleado']['rfc']}_{nomina['fecha_pago']}.pdf"
-    c = canvas.Canvas(factura_nombre, pagesize=letter)
-    c.drawString(100, 750, f"Nómina para: {nomina['empleado']['nombre']}")
-    c.drawString(100, 730, f"Fecha de pago: {nomina['fecha_pago']}")
-    c.drawString(100, 710, f"Percepciones: {nomina['percepciones']}")
-    c.drawString(100, 690, f"Deducciones: {nomina['deducciones']}")
-    c.drawString(100, 670, f"Total: {nomina['total']}")
-    c.save()
-    print(f"Nómina PDF generada: {factura_nombre}")
 
 def generar_xml_nomina(nomina_data):
     # Create the root element with namespaces

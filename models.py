@@ -236,3 +236,37 @@ class Employee:
     @staticmethod
     def delete_employee(db, employee_id):
         return db.employees.delete_one({"_id": ObjectId(employee_id)})
+
+class Issuer:
+    @staticmethod
+    def create_issuer(db, nombre, rfc, regimenFiscal, domicilioFiscal, telefono=None, correoElectronico=None):
+        issuer = {
+            "nombre": nombre,
+            "rfc": rfc,
+            "regimenFiscal": regimenFiscal,
+            "domicilioFiscal": domicilioFiscal,
+            "telefono": telefono,
+            "correoElectronico": correoElectronico,
+            "created_at": datetime.now(datetime.timezone.utc),
+            "updated_at": datetime.now(datetime.timezone.utc)
+        }
+        result = db.emisores.insert_one(issuer)
+        issuer['_id'] = result.inserted_id
+        return issuer
+
+    @staticmethod
+    def get_by_id(db, issuer_id):
+        return db.emisores.find_one({"_id": ObjectId(issuer_id)})
+
+    @staticmethod
+    def update_issuer(db, issuer_id, **kwargs):
+        kwargs['updated_at'] = datetime.utcnow()
+        db.emisores.update_one(
+            {"_id": ObjectId(issuer_id)},
+            {"$set": kwargs}
+        )
+        return db.emisores.find_one({"_id": ObjectId(issuer_id)})
+
+    @staticmethod
+    def delete_issuer(db, issuer_id):
+        return db.emisores.delete_one({"_id": ObjectId(issuer_id)})
