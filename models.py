@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 
 class Category:
@@ -7,8 +7,8 @@ class Category:
         category = {
             "name": name,
             "description": description,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
         }
         result = db.categories.insert_one(category)
         category['_id'] = result.inserted_id
@@ -24,7 +24,7 @@ class Category:
 
     @staticmethod
     def update_category(db, category_id, **kwargs):
-        kwargs['updated_at'] = datetime.utcnow()
+        kwargs['updated_at'] = datetime.now(timezone.utc)
         db.categories.update_one(
             {"_id": ObjectId(category_id)},
             {"$set": kwargs}
@@ -44,8 +44,8 @@ class Product:
             "min_stock": int(min_stock),
             "sat_code": sat_code,
             "category_id": ObjectId(category_id) if category_id else None,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
         }
         result = db.products.insert_one(product)
         product['_id'] = result.inserted_id
@@ -59,7 +59,7 @@ class Product:
     def update_product(db, product_id, **kwargs):
         if 'category_id' in kwargs and kwargs['category_id']:
             kwargs['category_id'] = ObjectId(kwargs['category_id'])
-        kwargs['updated_at'] = datetime.utcnow()
+        kwargs['updated_at'] = datetime.now(timezone.utc)
         db.products.update_one(
             {"_id": ObjectId(product_id)},
             {"$set": kwargs}
@@ -75,8 +75,8 @@ class Client:
             "phone": phone,
             "rfc": rfc,
             "address": address,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
         }
         result = db.clients.insert_one(client)
         client['_id'] = result.inserted_id
@@ -91,16 +91,15 @@ class Sale:
     def create_sale(db, client_id, total_amount, amount_received, change_amount, details, date=None):
         sale = {
             "client_id": ObjectId(client_id),
-            "date": date if date else datetime.utcnow(),
+            "date": date if date else datetime.now(timezone.utc),
             "total_amount": float(total_amount),
             "amount_received": float(amount_received),
             "change_amount": float(change_amount),
             "is_invoiced": False,
             "invoice_uuid": None,
             "invoice_date": None,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
-            "details": details,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
             "global_invoice_id": None
         }
         result = db.sales.insert_one(sale)
@@ -113,7 +112,7 @@ class Sale:
 
     @staticmethod
     def update_sale(db, sale_id, **kwargs):
-        kwargs['updated_at'] = datetime.utcnow()
+        kwargs['updated_at'] = datetime.now(timezone.utc)
         db.sales.update_one(
             {"_id": ObjectId(sale_id)},
             {"$set": kwargs}
@@ -133,7 +132,7 @@ class SaleDetail:
             "product_id": ObjectId(product_id),
             "quantity": int(quantity),
             "price": float(price),
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc)
         }
         result = db.sale_details.insert_one(sale_detail)
         sale_detail['_id'] = result.inserted_id
@@ -170,7 +169,7 @@ class GlobalInvoice:
             "cfdi_uuid": cfdi_uuid,
             "folio": folio,
             "xml_content": xml_content,
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
             "sale_ids": [ObjectId(sale_id) for sale_id in sale_ids]
         }
         result = db.global_invoices.insert_one(global_invoice)
@@ -213,8 +212,8 @@ class Employee:
             "cuentaBancaria": cuentaBancaria,
             "correoElectronico": correoElectronico,
             "telefono": telefono,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
         }
         result = db.employees.insert_one(employee)
         employee['_id'] = result.inserted_id
@@ -226,7 +225,7 @@ class Employee:
 
     @staticmethod
     def update_employee(db, employee_id, **kwargs):
-        kwargs['updated_at'] = datetime.utcnow()
+        kwargs['updated_at'] = datetime.now(timezone.utc)
         db.employees.update_one(
             {"_id": ObjectId(employee_id)},
             {"$set": kwargs}
@@ -247,8 +246,8 @@ class Issuer:
             "domicilioFiscal": domicilioFiscal,
             "telefono": telefono,
             "correoElectronico": correoElectronico,
-            "created_at": datetime.now(datetime.timezone.utc),
-            "updated_at": datetime.now(datetime.timezone.utc)
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
         }
         result = db.emisores.insert_one(issuer)
         issuer['_id'] = result.inserted_id
@@ -260,7 +259,7 @@ class Issuer:
 
     @staticmethod
     def update_issuer(db, issuer_id, **kwargs):
-        kwargs['updated_at'] = datetime.utcnow()
+        kwargs['updated_at'] = datetime.now(timezone.utc)
         db.emisores.update_one(
             {"_id": ObjectId(issuer_id)},
             {"$set": kwargs}

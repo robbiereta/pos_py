@@ -60,26 +60,7 @@ def create_app():
         print(f"Error initializing MongoDB: {str(e)}")
         raise
 
-def generar_factura(cliente, productos, total, fecha):
-    # Crear un archivo PDF
-    factura_nombre = f"factura_{cliente['name_cliente']}_{fecha}.pdf"
-    c = canvas.Canvas(factura_nombre, pagesize=letter)
-    
-    # Agregar contenido a la factura
-    c.drawString(100, 750, f"Factura para: {cliente['name_cliente']}")
-    c.drawString(100, 730, f"Fecha: {fecha}")
-    c.drawString(100, 710, "Productos:")
-    
-    y = 690
-    for producto in productos:
-        c.drawString(100, y, f"- {producto['nombre']} (Cantidad: {producto['quantity']}, Precio: {producto['price']})")
-        y -= 20
-    
-    c.drawString(100, y, f"Total: {total}")
-    
-    # Guardar el PDF
-    c.save()
-    print(f"Factura generada: {factura_nombre}")
+
 
 def guardar_venta(nota_venta):
     # Crear la aplicación y el contexto
