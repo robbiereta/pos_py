@@ -254,6 +254,18 @@ class Issuer:
         return issuer
 
     @staticmethod
+    def get_sales(db, issuer_id):
+        return list(db.sales.find({"issuer_id": ObjectId(issuer_id)}))
+
+    @staticmethod
+    def get_cfdis(db, issuer_id):
+        return list(db.invoices.find({"issuer_id": ObjectId(issuer_id)}))
+
+    @staticmethod
+    def get_products(db, issuer_id):
+        return list(db.products.find({"issuer_id": ObjectId(issuer_id)}))
+
+    @staticmethod
     def get_by_id(db, issuer_id):
         return db.emisores.find_one({"_id": ObjectId(issuer_id)})
 
@@ -268,4 +280,4 @@ class Issuer:
 
     @staticmethod
     def delete_issuer(db, issuer_id):
-        return db.emisores.delete_one({"_id": ObjectId(issuer_id)})
+        db.emisores.delete_one({"_id": ObjectId(issuer_id)})

@@ -2,8 +2,9 @@ from flask import Flask, jsonify, request
 from pymongo import MongoClient
 from bson import ObjectId
 import os
-from models import Sale, SaleDetail
+from models import Sale, SaleDetail, Invoice, GlobalInvoice, NominaInvoice
 import traceback
+from datetime import datetime
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -14,6 +15,10 @@ client = MongoClient(mongodb_uri)
 db = client['pos_db']
 sales_collection = db['sales']
 sale_details_collection = db['sale_details']
+cfdi_collection = db['cfdi']            
+invoice_collection = db['invoices']
+global_invoice_collection = db['global_invoices']
+nomina_invoice_collection = db['nomina_invoices']
 
 @app.route('/api/sales', methods=['POST'])
 def create_sale():
@@ -79,6 +84,84 @@ def delete_sale(id):
         return jsonify({'error': 'Sale not found'}), 404
     except Exception as e:
         print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cfdi/from_sales', methods=['POST'])
+def create_cfdi_from_sales():
+    try:
+        sales_ids = request.json.get('sales_ids')
+        sales = list(sales_collection.find({'_id': {'$in': [ObjectId(sid) for sid in sales_ids]}}))
+
+        if not sales:
+            return jsonify({'error': 'No sales found'}), 404
+
+        # Example: Generate CFDI content
+        cfdi_content = f"CFDI for sales: {', '.join([str(s['_id']) for s in sales])}"
+
+        # Store the CFDI in the database
+        cfdi_id = cfdi_collection.insert_one({'content': cfdi_content, 'sales_ids': sales_ids}).inserted_id
+
+        return jsonify({'cfdi_id': str(cfdi_id), 'message': 'CFDI created successfully'}), 201
+    except Exception as e:
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cfdi/client', methods=['POST'])
+def create_client_cfdi():
+    try:
+        data = request.json
+        invoice = Invoice.create_invoice(db, data['sale_id'], data['cfdi_uuid'], data['xml_content'], datetime.now())
+        return jsonify(invoice), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cfdi/global', methods=['POST'])
+def create_global_cfdi():
+    try:
+        data = request.json
+        global_invoice = GlobalInvoice.create_global_invoice(db, data['date'], data['total_amount'], data['tax_amount'], data['cfdi_uuid'], data['folio'], data['xml_content'], data['sale_ids'])
+        return jsonify(global_invoice), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cfdi/nomina', methods=['POST'])
+def create_nomina_cfdi():
+    try:
+        data = request.json
+        nomina_invoice = NominaInvoice.create_nomina_invoice(db, data['employee_id'], data['cfdi_uuid'], data['xml_content'], datetime.now())
+        return jsonify(nomina_invoice), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cfdi/<cfdi_id>', methods=['GET'])
+def get_cfdi(cfdi_id):
+    try:
+        cfdi = cfdi_collection.find_one({'_id': ObjectId(cfdi_id)})
+        if not cfdi:
+            return jsonify({'error': 'CFDI not found'}), 404
+        return jsonify(cfdi), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cfdi/<cfdi_id>', methods=['PUT'])
+def update_cfdi(cfdi_id):
+    try:
+        update_data = request.json
+        result = cfdi_collection.update_one({'_id': ObjectId(cfdi_id)}, {'$set': update_data})
+        if result.modified_count:
+            return jsonify({'status': 'CFDI updated'}), 200
+        return jsonify({'error': 'CFDI not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cfdi/<cfdi_id>', methods=['DELETE'])
+def delete_cfdi(cfdi_id):
+    try:
+        result = cfdi_collection.delete_one({'_id': ObjectId(cfdi_id)})
+        if result.deleted_count:
+            return jsonify({'status': 'CFDI deleted'}), 200
+        return jsonify({'error': 'CFDI not found'}), 404
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
