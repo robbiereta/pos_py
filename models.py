@@ -161,14 +161,14 @@ class Invoice:
 
 class GlobalInvoice:
     @staticmethod
-    def create_global_invoice(db, date, total_amount, tax_amount, cfdi_uuid, folio, xml_content, sale_ids):
+    def create_global_invoice(db, date, total_amount, tax_amount, cfdi_uuid, folio, json_content, sale_ids):
         global_invoice = {
             "date": date,
             "total_amount": float(total_amount),
             "tax_amount": float(tax_amount),
             "cfdi_uuid": cfdi_uuid,
             "folio": folio,
-            "xml_content": xml_content,
+            "json_content": json_content,
             "created_at": datetime.now(timezone.utc),
             "sale_ids": [ObjectId(sale_id) for sale_id in sale_ids]
         }
@@ -281,3 +281,33 @@ class Issuer:
     @staticmethod
     def delete_issuer(db, issuer_id):
         db.emisores.delete_one({"_id": ObjectId(issuer_id)})
+
+class NominaInvoice:
+    @staticmethod
+    def create_nomina_invoice(db, employee_id, cfdi_uuid, json_content, timestamp):
+        nomina_invoice = {
+            "employee_id": ObjectId(employee_id),
+            "cfdi_uuid": cfdi_uuid,
+            "json_content": json_content,
+            "timestamp": timestamp
+        }
+        result = db.nomina_invoices.insert_one(nomina_invoice)
+        nomina_invoice['_id'] = result.inserted_id
+        return nomina_invoice
+
+    @staticmethod
+    def get_by_id(db, invoice_id):
+        return db.nomina_invoices.find_one({"_id": ObjectId(invoice_id)})
+
+    @staticmethod
+    def update_nomina_invoice(db, invoice_id, **kwargs):
+        kwargs['updated_at'] = datetime.now(timezone.utc)
+        db.nomina_invoices.update_one(
+            {"_id": ObjectId(invoice_id)},
+            {"$set": kwargs}
+        )
+        return db.nomina_invoices.find_one({"_id": ObjectId(invoice_id)})
+
+    @staticmethod
+    def delete_nomina_invoice(db, invoice_id):
+        db.nomina_invoices.delete_one({"_id": ObjectId(invoice_id)})
