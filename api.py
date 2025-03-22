@@ -48,34 +48,6 @@ def load_user(user_id):
         return User(user_id, user['role'])
     return None
 
-@app.route('/api/ventas', methods=['GET'])
-def get_ventas():
-    try:
-        fecha_inicio = request.args.get('fecha_inicio')
-        fecha_fin = request.args.get('fecha_fin')
-        
-        query = {}
-        if fecha_inicio and fecha_fin:
-            query['timestamp'] = {
-                '$gte': datetime.fromisoformat(fecha_inicio),
-                '$lte': datetime.fromisoformat(fecha_fin)
-            }
-        
-        ventas = list(app.db.sales.find(query).sort('timestamp', -1))
-        ventas_json = json.dumps(ventas, cls=JSONEncoder)
-        return app.response_class(ventas_json, content_type='application/json')
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/ventas', methods=['POST'])
-def crear_venta():
-    try:
-        venta = request.json
-        venta['timestamp'] = datetime.fromisoformat(venta['timestamp'])
-        result = app.db.sales.insert_one(venta)
-        return jsonify({'id': str(result.inserted_id)}), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/cortes', methods=['GET'])
 def get_cortes():
@@ -134,64 +106,6 @@ def get_totales_mes(anio, mes):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/cfdi', methods=['GET'])
-def get_cfdi():
-    try:
-        fecha_inicio = request.args.get('fecha_inicio')
-        fecha_fin = request.args.get('fecha_fin')
-        
-        query = {}
-        if fecha_inicio and fecha_fin:
-            query['fecha'] = {
-                '$gte': datetime.fromisoformat(fecha_inicio),
-                '$lte': datetime.fromisoformat(fecha_fin)
-            }
-        
-        cfdi = list(app.db.cfdi.find(query).sort('fecha', -1))
-        cfdi_json = json.dumps(cfdi, cls=JSONEncoder)
-        return app.response_class(cfdi_json, content_type='application/json')
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/cfdi', methods=['POST'])
-def crear_cfdi():
-    try:
-        cfdi_data = request.json
-        cfdi_data['fecha'] = datetime.fromisoformat(cfdi_data['fecha'])
-        result = app.db.cfdi.insert_one(cfdi_data)
-        return jsonify({'id': str(result.inserted_id)}), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/nominas', methods=['GET'])
-def get_nominas():
-    try:
-        fecha_inicio = request.args.get('fecha_inicio')
-        fecha_fin = request.args.get('fecha_fin')
-        
-        query = {}
-        if fecha_inicio and fecha_fin:
-            query['fecha_pago'] = {
-                '$gte': datetime.fromisoformat(fecha_inicio),
-                '$lte': datetime.fromisoformat(fecha_fin)
-            }
-        
-        nominas = list(app.db.nominas.find(query).sort('fecha_pago', -1))
-        nominas_json = json.dumps(nominas, cls=JSONEncoder)
-        return app.response_class(nominas_json, content_type='application/json')
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/nominas', methods=['POST'])
-def crear_nomina():
-    try:
-        nomina_data = request.json
-        nomina_data['fecha_pago'] = datetime.fromisoformat(nomina_data['fecha_pago'])
-        result = app.db.nominas.insert_one(nomina_data)
-        return jsonify({'id': str(result.inserted_id)}), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 @app.route('/api/generate_cfdi', methods=['POST'])
 def generate_cfdi():
     try:
@@ -213,15 +127,7 @@ def generate_cfdi():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/generate_nomina', methods=['POST'])
-def generate_nomina():
-    try:
-        # Get payroll (nómina) data from the request
-        nomina_data = request.json
-       
-        
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/api/login', methods=['POST'])
 def login():

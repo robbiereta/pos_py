@@ -1,5 +1,5 @@
 import requests
-from models import Invoice, GlobalInvoice
+from models import Invoice, GlobalInvoice, Issuer, NominaInvoice
 import os
 from datetime import datetime
 import json
