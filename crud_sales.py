@@ -2,13 +2,14 @@ from flask import Flask, jsonify, request
 from pymongo import MongoClient
 from bson import ObjectId
 import os
-from models import Sale, SaleDetail, Invoice, GlobalInvoice, NominaInvoice
+from models import Sale, Invoice, GlobalInvoice, NominaInvoice
 import traceback
 from datetime import datetime
+from flask_cors import CORS
 
 # Initialize Flask app
 app = Flask(__name__)
-
+CORS(app)
 # Configure MongoDB
 mongodb_uri = os.getenv('MONGODB_URI')
 client = MongoClient(mongodb_uri)

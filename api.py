@@ -9,10 +9,23 @@ from cfdi_generator import CFDIGenerator
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin
 
+# Import CRUD modules
+from crud_sales import app as sales_app
+from routes.clients import clients_bp
+from issuer_crud import app as issuer_app
+from employee_crud import app as employee_app
+from routes.products import products_bp
+
 app = create_app()
 app.secret_key = 'your_secret_key_here'  # Set a secret key for session management
 CORS(app)  # Enable CORS for all routes
 
+# Register blueprints for CRUD operations
+app.register_blueprint(sales_app, url_prefix='/api/sales')
+app.register_blueprint(clients_bp, url_prefix='/api/clients')
+app.register_blueprint(issuer_app, url_prefix='/api/issuer')
+app.register_blueprint(employee_app, url_prefix='/api/employee')
+app.register_blueprint(products_bp, url_prefix='/api/products')
 # Helper para convertir ObjectId a string
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -101,7 +114,7 @@ def get_corte(corte_id):
 def get_totales_mes(anio, mes):
     try:
         cortes = CorteCajaMongo(app.db)
-        totales = cortes.calcular_totales_del_mes(anio, mes)
+        totales = cortes.obtener_totales_mes(anio, mes)
         return jsonify(totales)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
