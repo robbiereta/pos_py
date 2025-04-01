@@ -1,11 +1,11 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Blueprint
 from pymongo import MongoClient
 from bson import ObjectId
 import os
 from convertir_ventas import create_app
 
-# Initialize Flask app
-app = create_app()
+# Initialize Flask Blueprint
+employee_app = Blueprint('employee_app', __name__)
 
 # Configure MongoDB
 mongodb_uri = os.getenv('MONGODB_URI')
@@ -13,7 +13,7 @@ client = MongoClient(mongodb_uri)
 db = client['pos_db']
 employees_collection = db['employees']
 
-@app.route('/api/employees', methods=['POST'])
+@employee_app.route('/api/employees', methods=['POST'])
 def create_employee():
     try:
         employee_data = request.json
@@ -22,7 +22,7 @@ def create_employee():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/employees', methods=['GET'])
+@employee_app.route('/api/employees', methods=['GET'])
 def get_employees():
     try:
         employees = list(employees_collection.find())
@@ -32,7 +32,7 @@ def get_employees():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/employees/<id>', methods=['GET'])
+@employee_app.route('/api/employees/<id>', methods=['GET'])
 def get_employee(id):
     try:
         employee = employees_collection.find_one({'_id': ObjectId(id)})
@@ -43,7 +43,7 @@ def get_employee(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/employees/<id>', methods=['PUT'])
+@employee_app.route('/api/employees/<id>', methods=['PUT'])
 def update_employee(id):
     try:
         update_data = request.json
@@ -54,7 +54,7 @@ def update_employee(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/employees/<id>', methods=['DELETE'])
+@employee_app.route('/api/employees/<id>', methods=['DELETE'])
 def delete_employee(id):
     try:
         result = employees_collection.delete_one({'_id': ObjectId(id)})
@@ -65,4 +65,6 @@ def delete_employee(id):
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    app = create_app()
+    app.register_blueprint(employee_app)
     app.run(debug=True, port=5000)

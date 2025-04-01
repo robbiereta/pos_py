@@ -10,10 +10,10 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin
 
 # Import CRUD modules
-from crud_sales import app as sales_app
+from crud_sales import sales_app as sales_bp
 from routes.clients import clients_bp
-from issuer_crud import app as issuer_app
-from employee_crud import app as employee_app
+from issuer_crud import issuer_app as issuer_bp
+from employee_crud import employee_app as employee_bp
 from routes.products import products_bp
 
 app = create_app()
@@ -21,10 +21,10 @@ app.secret_key = 'your_secret_key_here'  # Set a secret key for session manageme
 CORS(app)  # Enable CORS for all routes
 
 # Register blueprints for CRUD operations
-app.register_blueprint(sales_app, url_prefix='/api/sales')
+app.register_blueprint(sales_bp, url_prefix='/api/sales')
 app.register_blueprint(clients_bp, url_prefix='/api/clients')
-app.register_blueprint(issuer_app, url_prefix='/api/issuer')
-app.register_blueprint(employee_app, url_prefix='/api/employee')
+app.register_blueprint(issuer_bp, url_prefix='/api/issuer')
+app.register_blueprint(employee_bp, url_prefix='/api/employee')
 app.register_blueprint(products_bp, url_prefix='/api/products')
 # Helper para convertir ObjectId a string
 class JSONEncoder(json.JSONEncoder):

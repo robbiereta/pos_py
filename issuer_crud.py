@@ -1,10 +1,10 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Blueprint
 from pymongo import MongoClient
 from bson import ObjectId
 import os
 
-# Initialize Flask app
-app = Flask(__name__)
+# Initialize Flask Blueprint
+issuer_app = Blueprint('issuer_app', __name__)
 
 # Configure MongoDB
 mongodb_uri = os.getenv('MONGODB_URI')
@@ -12,7 +12,7 @@ client = MongoClient(mongodb_uri)
 db = client['pos_db']
 emisores_collection = db['emisores']
 
-@app.route('/api/emisores', methods=['POST'])
+@issuer_app.route('/api/emisores', methods=['POST'])
 def create_emitter():
     try:
         emitter_data = request.json
@@ -21,7 +21,7 @@ def create_emitter():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/emisores', methods=['GET'])
+@issuer_app.route('/api/emisores', methods=['GET'])
 def get_emisores():
     try:
         emisores = list(emisores_collection.find())
@@ -31,7 +31,7 @@ def get_emisores():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/emisores/<id>', methods=['GET'])
+@issuer_app.route('/api/emisores/<id>', methods=['GET'])
 def get_emitter(id):
     try:
         emitter = emisores_collection.find_one({'_id': ObjectId(id)})
@@ -42,7 +42,7 @@ def get_emitter(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/emisores/<id>', methods=['PUT'])
+@issuer_app.route('/api/emisores/<id>', methods=['PUT'])
 def update_emitter(id):
     try:
         update_data = request.json
@@ -53,7 +53,7 @@ def update_emitter(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/emisores/<id>', methods=['DELETE'])
+@issuer_app.route('/api/emisores/<id>', methods=['DELETE'])
 def delete_emitter(id):
     try:
         result = emisores_collection.delete_one({'_id': ObjectId(id)})
@@ -64,4 +64,6 @@ def delete_emitter(id):
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    app = Flask(__name__)
+    app.register_blueprint(issuer_app)
     app.run(debug=True, port=5000)
