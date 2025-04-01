@@ -8,6 +8,7 @@ import json
 from cfdi_generator import CFDIGenerator
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin
+import requests
 
 # Import CRUD modules
 from crud_sales import sales_app as sales_bp
@@ -192,6 +193,20 @@ def register():
         return jsonify({'message': 'User registered successfully'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/mercadolibre/products', methods=['GET'])
+def get_mercadolibre_products():
+    query = request.args.get('query')
+    if not query:
+        return jsonify({'error': 'Query parameter is required'}), 400
+    
+    url = f'https://api.mercadolibre.com/sites/MLA/search?q={query}'
+    response = requests.get(url)
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to fetch data from MercadoLibre'}), response.status_code
+    
+    data = response.json()
+    return jsonify(data), 200
 
 @app.route('/home')
 def home():
