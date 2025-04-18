@@ -1,14 +1,15 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Blueprint
 from pymongo import MongoClient
 from bson import ObjectId
 import os
-from models import Sale, SaleDetail, Invoice, GlobalInvoice, NominaInvoice
+from models import Sale, Invoice, GlobalInvoice, NominaInvoice
 import traceback
 from datetime import datetime
+from flask_cors import CORS
 
 # Initialize Flask app
 app = Flask(__name__)
-
+CORS(app)
 # Configure MongoDB
 mongodb_uri = os.getenv('MONGODB_URI')
 client = MongoClient(mongodb_uri)
@@ -20,7 +21,10 @@ invoice_collection = db['invoices']
 global_invoice_collection = db['global_invoices']
 nomina_invoice_collection = db['nomina_invoices']
 
-@app.route('/api/sales', methods=['POST'])
+# Initialize Flask Blueprint
+sales_app = Blueprint('sales_app', __name__)
+
+@sales_app.route('/', methods=['POST'])
 def create_sale():
     try:
         sale_data = request.json
@@ -38,7 +42,7 @@ def create_sale():
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/sales', methods=['GET'])
+@sales_app.route('/', methods=['GET'])
 def get_sales():
     try:
         sales = list(sales_collection.find())
@@ -50,7 +54,7 @@ def get_sales():
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/sales/<id>', methods=['GET'])
+@sales_app.route('/<id>', methods=['GET'])
 def get_sale(id):
     try:
         sale = sales_collection.find_one({'_id': ObjectId(id)})
@@ -63,7 +67,7 @@ def get_sale(id):
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/sales/<id>', methods=['PUT'])
+@sales_app.route('/<id>', methods=['PUT'])
 def update_sale(id):
     try:
         update_data = request.json
@@ -75,7 +79,7 @@ def update_sale(id):
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/sales/<id>', methods=['DELETE'])
+@sales_app.route('/<id>', methods=['DELETE'])
 def delete_sale(id):
     try:
         result = sales_collection.delete_one({'_id': ObjectId(id)})
@@ -86,7 +90,7 @@ def delete_sale(id):
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/cfdi/from_sales', methods=['POST'])
+@sales_app.route('/api/cfdi/from_sales', methods=['POST'])
 def create_cfdi_from_sales():
     try:
         sales_ids = request.json.get('sales_ids')
@@ -106,7 +110,7 @@ def create_cfdi_from_sales():
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/cfdi/client', methods=['POST'])
+@sales_app.route('/api/cfdi/client', methods=['POST'])
 def create_client_cfdi():
     try:
         data = request.json
@@ -115,7 +119,7 @@ def create_client_cfdi():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/cfdi/global', methods=['POST'])
+@sales_app.route('/api/cfdi/global', methods=['POST'])
 def create_global_cfdi():
     try:
         data = request.json
@@ -124,7 +128,7 @@ def create_global_cfdi():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/cfdi/nomina', methods=['POST'])
+@sales_app.route('/api/cfdi/nomina', methods=['POST'])
 def create_nomina_cfdi():
     try:
         data = request.json
@@ -133,7 +137,7 @@ def create_nomina_cfdi():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/cfdi/<cfdi_id>', methods=['GET'])
+@sales_app.route('/api/cfdi/<cfdi_id>', methods=['GET'])
 def get_cfdi(cfdi_id):
     try:
         cfdi = cfdi_collection.find_one({'_id': ObjectId(cfdi_id)})
@@ -143,7 +147,7 @@ def get_cfdi(cfdi_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/cfdi/<cfdi_id>', methods=['PUT'])
+@sales_app.route('/api/cfdi/<cfdi_id>', methods=['PUT'])
 def update_cfdi(cfdi_id):
     try:
         update_data = request.json
@@ -154,7 +158,7 @@ def update_cfdi(cfdi_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/cfdi/<cfdi_id>', methods=['DELETE'])
+@sales_app.route('/api/cfdi/<cfdi_id>', methods=['DELETE'])
 def delete_cfdi(cfdi_id):
     try:
         result = cfdi_collection.delete_one({'_id': ObjectId(cfdi_id)})
@@ -166,6 +170,7 @@ def delete_cfdi(cfdi_id):
 
 if __name__ == '__main__':
     try:
+        app.register_blueprint(sales_app)
         app.run(debug=True, port=5001)
     finally:
         client.close()

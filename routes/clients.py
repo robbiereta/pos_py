@@ -48,7 +48,7 @@ def get_client(client_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@clients_bp.route('/api/clients', methods=['POST'])
+@clients_bp.route('/', methods=['POST'])
 def create_client():
     try:
         data = request.get_json()

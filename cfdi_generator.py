@@ -320,15 +320,7 @@ class CFDIGenerator:
         except Exception as e:
             raise Exception(f"Error generating Global CFDI: {str(e)}")
 
-    def stamp_cfdi(self, cfdi_data):
-        try:
-            response = requests.post(f"{self.url}/cfdi33/stamp", headers=self.headers, json=cfdi_data)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Error stamping CFDI: {e}")
-            return None
-
+  
 # Example usage
 cfdi_generator = CFDIGenerator(test_mode=False)
 example_cfdi_data = {
@@ -342,8 +334,4 @@ example_cfdi_data = {
         "traslados": []
     }
 }
-stamped_cfdi = cfdi_generator.stamp_cfdi(example_cfdi_data)
-print(stamped_cfdi)
 
-# Create singleton instances for different modes
-cfdi_generator = CFDIGenerator(test_mode=False) 

@@ -8,11 +8,25 @@ import json
 from cfdi_generator import CFDIGenerator
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin
+import requests
+
+# Import CRUD modules
+from crud_sales import sales_app as sales_bp
+from routes.clients import clients_bp
+from issuer_crud import issuer_app as issuer_bp
+from employee_crud import employee_app as employee_bp
+from routes.products import products_bp
 
 app = create_app()
 app.secret_key = 'your_secret_key_here'  # Set a secret key for session management
 CORS(app)  # Enable CORS for all routes
 
+# Register blueprints for CRUD operations
+app.register_blueprint(sales_bp, url_prefix='/api/sales')
+app.register_blueprint(clients_bp, url_prefix='/api/clients')
+app.register_blueprint(issuer_bp, url_prefix='/api/issuer')
+app.register_blueprint(employee_bp, url_prefix='/api/employee')
+app.register_blueprint(products_bp, url_prefix='/api/products')
 # Helper para convertir ObjectId a string
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -101,7 +115,7 @@ def get_corte(corte_id):
 def get_totales_mes(anio, mes):
     try:
         cortes = CorteCajaMongo(app.db)
-        totales = cortes.calcular_totales_del_mes(anio, mes)
+        totales = cortes.obtener_totales_mes(anio, mes)
         return jsonify(totales)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -179,6 +193,20 @@ def register():
         return jsonify({'message': 'User registered successfully'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/mercadolibre/products', methods=['GET'])
+def get_mercadolibre_products():
+    query = request.args.get('query')
+    if not query:
+        return jsonify({'error': 'Query parameter is required'}), 400
+    
+    url = f'https://api.mercadolibre.com/sites/MLA/search?q={query}'
+    response = requests.get(url)
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to fetch data from MercadoLibre'}), response.status_code
+    
+    data = response.json()
+    return jsonify(data), 200
 
 @app.route('/home')
 def home():
