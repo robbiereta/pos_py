@@ -85,63 +85,80 @@ def convertir_e_importar_ventas(archivo_origen):
             
             # Procesar cada columna (día)
             for col in df.columns:
-                fecha_str = df.iloc[0][col]
+                print(f"Procesando columna: {col}, Total filas: {len(df[col])}")
+                if len(df[col]) < 1:
+                    print(f"Columna {col} está vacía, saltando...")
+                    continue
                 
-                if pd.notna(fecha_str):
-                    try:
-                        # Convertir la fecha a datetime
-                        if isinstance(fecha_str, str):
-                            fecha = datetime.strptime(fecha_str.split()[0], '%d-%m-%Y')
-                        else:
-                            fecha = fecha_str.replace(hour=0, minute=0, second=0, microsecond=0)
-                        
-                        # Obtener todas las ventas de ese día (ignorando NaN)
-                        ventas_dia = df[col][1:].dropna()
-                        
-                        for venta_str in ventas_dia:
-                            try:
-                                # Convertir la venta a float, eliminando el tiempo si existe
-                                if isinstance(venta_str, str):
-                                    monto_str = venta_str.split()[0]
+                try:
+                    fecha_str = df.iloc[0][col]
+                    print(f"Fecha en primera fila de columna {col}: {fecha_str}")
+                    
+                    if pd.notna(fecha_str):
+                        try:
+                            # Convertir la fecha a datetime
+                            if isinstance(fecha_str, str):
+                                fecha = datetime.strptime(fecha_str.split()[0], '%d-%m-%Y')
+                            else:
+                                # Ensure fecha_str is a datetime object
+                                if isinstance(fecha_str, datetime):
+                                    fecha = fecha_str.replace(hour=0, minute=0, second=0, microsecond=0)
                                 else:
-                                    monto_str = str(venta_str)
-                                
-                                monto_float = float(monto_str)
-                                
-                                if monto_float > 0:
-                                    # Todas las ventas son en efectivo
-                                    metodo_pago = 'efectivo'
+                                    print(f"Error: fecha_str is not a datetime object: {fecha_str}")
+                                    continue
+                            
+                            # Obtener todas las ventas de ese día (ignorando NaN)
+                            ventas_dia = df[col][1:].dropna()
+                            print(f"Ventas encontradas en columna {col}: {len(ventas_dia)}")
+                            
+                            for idx, venta_str in enumerate(ventas_dia):
+                                print(f"Procesando venta {idx+1} en columna {col}: {venta_str}")
+                                try:
+                                    # Convertir la venta a float, eliminando el tiempo si existe
+                                    if isinstance(venta_str, str):
+                                        monto_str = venta_str.split()[0] if ' ' in venta_str else venta_str
+                                    else:
+                                        monto_str = str(venta_str)
                                     
-                                    # Crear la venta
-                                    venta = {
-                                        'timestamp': fecha,
-                                        'amount': str(monto_float),
-                                        'payment_method': metodo_pago,
-                                        'client_id': str(cliente_default['_id']),
-                                        'products': [str(producto_default['_id'])]
-                                    }
+                                    monto_float = float(monto_str)
                                     
-                                    # Guardar en MongoDB
-                                    db.sales.insert_one(venta)
-                                    
-                                    # Actualizar estadísticas
-                                    fecha_key = fecha.strftime('%Y-%m-%d')
-                                    ventas_por_dia[fecha_key] += monto_float
-                                    total_ventas += monto_float
-                                    min_venta = min(min_venta, monto_float)
-                                    max_venta = max(max_venta, monto_float)
-                                    ventas_importadas += 1
-                                    
-                                    if ventas_importadas % 100 == 0:
-                                        print(f"Procesadas {ventas_importadas} ventas...")
+                                    if monto_float > 0:
+                                        # Todas las ventas son en efectivo
+                                        metodo_pago = 'efectivo'
                                         
-                            except (ValueError, TypeError) as e:
-                                print(f"Error al procesar monto: {venta_str} - {str(e)}")
-                                continue
-                        
-                    except (ValueError, TypeError) as e:
-                        print(f"Error al procesar fecha: {fecha_str} - {str(e)}")
-                        continue
+                                        # Crear la venta
+                                        venta = {
+                                            'timestamp': fecha,
+                                            'amount': str(monto_float),
+                                            'payment_method': metodo_pago,
+                                            'client_id': str(cliente_default['_id']),
+                                            'products': [str(producto_default['_id'])]
+                                        }
+                                        
+                                        # Guardar en MongoDB
+                                        db.sales.insert_one(venta)
+                                        
+                                        # Actualizar estadísticas
+                                        fecha_key = fecha.strftime('%Y-%m-%d')
+                                        ventas_por_dia[fecha_key] += monto_float
+                                        total_ventas += monto_float
+                                        min_venta = min(min_venta, monto_float)
+                                        max_venta = max(max_venta, monto_float)
+                                        ventas_importadas += 1
+                                        
+                                        if ventas_importadas % 100 == 0:
+                                            print(f"Procesadas {ventas_importadas} ventas...")
+                                            
+                                except (ValueError, TypeError) as e:
+                                    print(f"Error al procesar monto en columna {col}, venta {idx+1}: {venta_str} - {str(e)}")
+                                    continue
+                            
+                        except (ValueError, TypeError) as e:
+                            print(f"Error al procesar fecha en columna {col}: {fecha_str} - {str(e)}")
+                            continue
+                except Exception as e:
+                    print(f"Error al acceder a datos en columna {col}: {str(e)}")
+                    continue
             
             # Imprimir resumen
             print("\nResumen de importación:")
@@ -162,6 +179,6 @@ def convertir_e_importar_ventas(archivo_origen):
             return {'status': 'error'}
 
 if __name__ == "__main__":
-    archivo_origen = "ventas_marzo_2semana.xlsx"
+    archivo_origen = "_ventas_marzo25_4sem.xlsx"
     resultado = convertir_e_importar_ventas(archivo_origen)
     print(f"\nEstado final: {resultado['status']}")

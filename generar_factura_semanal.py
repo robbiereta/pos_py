@@ -15,21 +15,25 @@ def generar_factura_semanal(fecha_inicio_str):
             
             # Convertir la fecha de inicio a datetime
             fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
-            # La fecha final es 6 días después (para completar una semana)
-            fecha_fin = fecha_inicio + timedelta(days=6, hours=23, minutes=59, seconds=59)
+            # La fecha final es 6 días después (para completar una semana), o hasta el final del mes para la última semana
+            if fecha_inicio_str == '2025-03-22':
+                fecha_fin = datetime(2025, 3, 31, 23, 59, 59)
+            else:
+                fecha_fin = fecha_inicio + timedelta(days=6, hours=23, minutes=59, seconds=59)
             
             print(f"\nGenerando factura para la semana del {fecha_inicio.strftime('%Y-%m-%d')} al {fecha_fin.strftime('%Y-%m-%d')}")
             
-            # Obtener las ventas de la semana
+            # Obtener las ventas de la semana, solo las no facturadas
             ventas = list(db.sales.find({
                 "timestamp": {
                     "$gte": fecha_inicio,
                     "$lte": fecha_fin
-                }
+                },
+                "is_invoiced": {"$ne": True}
             }))
             
             if not ventas:
-                print("No hay ventas en este período.")
+                print("No hay ventas nuevas en este período.")
                 return
             
             # Convertir las ventas al formato esperado y calcular totales
@@ -81,7 +85,7 @@ def generar_factura_semanal(fecha_inicio_str):
             cfdi_generator = CFDIGenerator(test_mode=False)
             
             # Generar CFDI
-            result = cfdi_generator.generate_global_cfdi(ventas_procesadas, current_datetime)
+            result = cfdi_generator.generate_global_cfdi(ventas_procesadas, current_datetime, db)
             
             # Imprimir resultado
             print("\n¡CFDI Generado Exitosamente!")
@@ -124,5 +128,5 @@ def generar_factura_semanal(fecha_inicio_str):
             return None
 
 if __name__ == "__main__":
-    # Generar factura para la primera semana de marzo 2025
-    generar_factura_semanal('2025-03-08')
+    # Generar factura para la cuarta semana de marzo 2025, hasta el final del mes
+    generar_factura_semanal('2025-03-22')

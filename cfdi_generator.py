@@ -237,23 +237,23 @@ class CFDIGenerator:
         except Exception as e:
             raise Exception(f"Error generating CFDI: {str(e)}")
 
-    def _get_next_global_folio(self):
+    def get_next_folio(self, db):
         """Get next available folio for global invoices"""
         try:
             # Get last folio from database
-            # result = db.session.query(GlobalInvoice.folio)\
-            #     .order_by(GlobalInvoice.folio.desc())\
-            #     .first()
+            result = db.session.query(GlobalInvoice.folio)\
+                .order_by(GlobalInvoice.folio.desc())\
+                .first()
             
-            # if result and result[0]:
-            #     last_folio = int(result[0])
-            #     return str(last_folio + 1).zfill(6)  # Format: 000001, 000002, etc.
+            if result and result[0]:
+                last_folio = int(result[0])
+                return str(last_folio + 1).zfill(6)  # Format: 000001, 000002, etc.
             return "000001"  # First folio
         except Exception as e:
             print(f"Error getting next folio: {str(e)}")
-            return "000001"
+            return "000001"  # Fallback in case of error
 
-    def generate_global_cfdi(self, sales, date):
+    def generate_global_cfdi(self, sales, date, db):
         """Generate a global CFDI for multiple sales"""
         try:
             # First prepare concepts to get exact tax amounts
@@ -267,7 +267,7 @@ class CFDIGenerator:
             total_amount = round(subtotal + total_tax, 2)
             
             # Get next folio
-            folio = self._get_next_global_folio()
+            folio = self.get_next_folio(db)
             
             # Prepare CFDI
             comprobante = {
@@ -276,7 +276,7 @@ class CFDIGenerator:
                 "Folio": folio,
                 "Fecha": date.strftime("%Y-%m-%dT%H:%M:%S"),
                 "Sello": "",
-                "FormaPago": "99",
+                "FormaPago": "01",
                 "NoCertificado": "",
                 "Certificado": "",
                 "SubTotal": f"{subtotal:.2f}",
