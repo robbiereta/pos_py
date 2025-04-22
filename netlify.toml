@@ -1,0 +1,12 @@
+[build]
+  command = "echo 'Flask app deployment not directly supported by Netlify. Consider using serverless functions or another platform.'"
+  publish = "static"
+
+[[redirects]]
+  from = "/*"
+  to = "/"
+  status = 200
+
+# Placeholder for potential serverless function configuration
+[functions]
+  directory = "netlify/functions"

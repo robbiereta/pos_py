@@ -7,7 +7,7 @@ from bson import ObjectId
 import json
 from cfdi_generator import CFDIGenerator
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin
+from flask-login import LoginManager, login_user, login_required, logout_user, UserMixin
 import requests
 
 # Import CRUD modules

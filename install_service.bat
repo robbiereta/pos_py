@@ -1,0 +1,6 @@
+@echo off
+@echo Installing POS System Service...
+python c:\Users\usuario\Documents\pos_py\pos_service.py install
+@echo Service installed. Now starting the service...
+net start POSSystemService
+pause

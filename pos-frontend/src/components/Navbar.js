@@ -20,6 +20,9 @@ export default function Navbar() {
             <Link href="/reportes" className="hover:text-gray-300">
               Reportes
             </Link>
+            <Link href="/api-documentation" className="hover:text-gray-300">
+              API Docs
+            </Link>
           </div>
         </div>
       </div>
