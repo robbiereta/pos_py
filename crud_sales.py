@@ -9,7 +9,8 @@ from flask_cors import CORS
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)
+# Configure CORS to allow requests from frontend
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 # Configure MongoDB
 mongodb_uri = os.getenv('MONGODB_URI')
 client = MongoClient(mongodb_uri)
@@ -29,14 +30,26 @@ def create_sale():
     try:
         sale_data = request.json
         client_id = sale_data.get('client_id')
-        total_amount = sale_data.get('total_amount')
-        amount_received = sale_data.get('amount_received')
-        change_amount = sale_data.get('change_amount')
-        details = sale_data.get('details')
+        total_amount = sale_data.get('amount', 0)
+        items = sale_data.get('items', [])
+        payment_method = sale_data.get('payment_method', '01')
+        date = sale_data.get('date', datetime.now().isoformat())
 
-        sale = Sale.create_sale(db, client_id, total_amount, amount_received, change_amount, details)
-        sale['_id'] = str(sale['_id'])
-        sale['client_id'] = str(sale['client_id'])
+        # Create sale record in database
+        sale = {
+            'client_id': client_id,
+            'total_amount': total_amount,
+            'items': items,
+            'payment_method': payment_method,
+            'date': date,
+            'facturada': False
+        }
+        result = sales_collection.insert_one(sale)
+        sale['_id'] = str(result.inserted_id)
+        
+        if client_id:
+            sale['client_id'] = str(sale['client_id'])
+        
         return jsonify(sale), 201
     except Exception as e:
         print(traceback.format_exc())

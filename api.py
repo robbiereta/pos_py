@@ -7,7 +7,13 @@ from bson import ObjectId
 import json
 from cfdi_generator import CFDIGenerator
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask-login import LoginManager, login_user, login_required, logout_user, UserMixin
+from flask_login import (  
+    LoginManager,
+    login_user,
+    login_required,
+    logout_user,
+    UserMixin
+)
 import requests
 
 # Import CRUD modules
@@ -19,7 +25,8 @@ from routes.products import products_bp
 
 app = create_app()
 app.secret_key = 'your_secret_key_here'  # Set a secret key for session management
-CORS(app)  # Enable CORS for all routes
+# Configure CORS to allow requests from frontend
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})  # Enable CORS for frontend requests
 
 # Register blueprints for CRUD operations
 app.register_blueprint(sales_bp, url_prefix='/api/sales')
@@ -207,6 +214,115 @@ def get_mercadolibre_products():
     
     data = response.json()
     return jsonify(data), 200
+
+@app.route('/api/generate_client_cfdi', methods=['POST'])
+@login_required
+def generate_client_cfdi():
+    try:
+        data = request.json
+        nota_venta = data.get('nota_venta')
+        
+        if not nota_venta:
+            return jsonify({'error': 'Se requiere el ID de la nota de venta'}), 400
+            
+        app_instance = create_app()
+        with app_instance.app_context():
+            # Obtener venta específica por ID
+            sale = app_instance.db.sales.find_one({"_id": nota_venta})
+            
+            if not sale:
+                return jsonify({'error': f"No se encontró la venta con ID {nota_venta}" }), 404
+            
+            # Verificar si ya fue facturada
+            if sale.get('facturada', False):
+                return jsonify({'error': 'Esta venta ya ha sido facturada'}), 400
+                
+            # Obtener información del cliente
+            client_id = sale.get('client_id')
+            client = app_instance.db.clients.find_one({"_id": client_id}) if client_id else None
+            
+            if not client:
+                return jsonify({'error': 'No se encontró información del cliente. No se puede generar factura'}), 404
+            
+            # Calcular totales
+            total_amount = sale.get('total_amount', 0)
+            # El IVA ya está incluido en el total, así que lo extraemos (16%)
+            subtotal = total_amount / 1.16
+            tax_amount = total_amount - subtotal
+            
+            # Obtener fecha actual
+            fecha_emision = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            
+            # Preparar conceptos (productos) de la venta
+            conceptos = []
+            for item in sale.get('items', []):
+                concepto = {
+                    'ClaveProdServ': item.get('product_code', '01010101'),
+                    'Cantidad': item.get('quantity', 1),
+                    'ClaveUnidad': item.get('unit_code', 'H87'),
+                    'Unidad': item.get('unit', 'Pieza'),
+                    'Descripcion': item.get('description', 'Producto'),
+                    'ValorUnitario': item.get('price', 0),
+                    'Importe': item.get('total', 0),
+                    'Descuento': item.get('discount', 0),
+                    'ObjetoImp': '02',  # Objeto de impuesto
+                    'Impuestos': {
+                        'Traslados': [{
+                            'Base': item.get('total', 0) / 1.16,
+                            'Impuesto': '002',  # IVA
+                            'TipoFactor': 'Tasa',
+                            'TasaOCuota': '0.160000',
+                            'Importe': item.get('total', 0) - (item.get('total', 0) / 1.16)
+                        }]
+                    }
+                }
+                conceptos.append(concepto)
+            
+            # Preparar datos para el CFDI
+            cfdi_data = {
+                'Serie': 'A',
+                'Folio': str(nota_venta)[-6:],  # Últimos 6 dígitos del ID de venta
+                'Fecha': fecha_emision,
+                'FormaPago': sale.get('payment_method', '01'),  # 01 - Efectivo
+                'MetodoPago': 'PUE',  # Pago en una sola exhibición
+                'LugarExpedicion': '67100',  # Código postal
+                'Receptor': {
+                    'Rfc': client.get('rfc', 'XAXX010101000'),
+                    'Nombre': client.get('name', 'PUBLICO EN GENERAL'),
+                    'UsoCFDI': client.get('uso_cfdi', 'G03'),  # Gastos en general
+                    'RegimenFiscalReceptor': client.get('regimen_fiscal', '616'),  # Sin obligaciones fiscales
+                    'DomicilioFiscalReceptor': client.get('codigo_postal', '67100')
+                },
+                'Conceptos': conceptos,
+                'Impuestos': {
+                    'TotalImpuestosTrasladados': tax_amount,
+                    'Traslados': [{
+                        'Impuesto': '002',
+                        'TipoFactor': 'Tasa',
+                        'TasaOCuota': '0.160000',
+                        'Importe': tax_amount
+                    }]
+                },
+                'SubTotal': round(subtotal, 2),
+                'Total': round(total_amount, 2)
+            }
+            
+            # Generar CFDI
+            generator = CFDIGenerator()
+            xml_path = generator.generate_cfdi(cfdi_data, f"factura_{nota_venta}.xml")
+            
+            if xml_path:
+                # Actualizar estado de la venta
+                app_instance.db.sales.update_one(
+                    {"_id": nota_venta},
+                    {"$set": {"facturada": True, "fecha_factura": datetime.now()}}
+                )
+                return jsonify({'success': True, 'message': 'Factura generada exitosamente', 'xml_path': xml_path}), 200
+            else:
+                return jsonify({'error': 'Error al generar la factura'}), 500
+                
+    except Exception as e:
+        return jsonify({'error': f"Error al generar factura: {str(e)}"}), 500
 
 @app.route('/home')
 def home():
