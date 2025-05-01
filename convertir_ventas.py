@@ -179,6 +179,6 @@ def convertir_e_importar_ventas(archivo_origen):
             return {'status': 'error'}
 
 if __name__ == "__main__":
-    archivo_origen = "_ventas_marzo25_4sem.xlsx"
+    archivo_origen = "_ventas_abril25_1y2sem.xlsx"
     resultado = convertir_e_importar_ventas(archivo_origen)
     print(f"\nEstado final: {resultado['status']}")
