@@ -15,9 +15,9 @@ def generar_factura_semanal(fecha_inicio_str):
             
             # Convertir la fecha de inicio a datetime
             fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
-            # La fecha final es 14 días después para la primera quincena de abril
+            # La fecha final es 6 días después (para completar una semana), o hasta el final del mes para la última semana
             if fecha_inicio_str == '2025-04-01':
-                fecha_fin = datetime(2025, 4, 15, 23, 59, 59)
+                fecha_fin = datetime(2025, 4, 30, 23, 59, 59)
             else:
                 fecha_fin = fecha_inicio + timedelta(days=14, hours=23, minutes=59, seconds=59)
             

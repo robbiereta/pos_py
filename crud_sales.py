@@ -15,12 +15,19 @@ CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 mongodb_uri = os.getenv('MONGODB_URI')
 client = MongoClient(mongodb_uri)
 db = client['pos_db']
-sales_collection = db['sales']
-sale_details_collection = db['sale_details']
-cfdi_collection = db['cfdi']            
-invoice_collection = db['invoices']
-global_invoice_collection = db['global_invoices']
-nomina_invoice_collection = db['nomina_invoices']
+
+# Determine the environment (production or development)
+ENVIRONMENT = os.getenv('POS_ENV', 'production')
+
+# Set collection suffix based on environment
+COLLECTION_SUFFIX = '_development' if ENVIRONMENT == 'development' else ''
+
+sales_collection = db[f'sales{COLLECTION_SUFFIX}']
+sale_details_collection = db[f'sale_details{COLLECTION_SUFFIX}']
+cfdi_collection = db[f'cfdi{COLLECTION_SUFFIX}']            
+invoice_collection = db[f'invoices{COLLECTION_SUFFIX}']
+global_invoice_collection = db[f'global_invoices{COLLECTION_SUFFIX}']
+nomina_invoice_collection = db[f'nomina_invoices{COLLECTION_SUFFIX}']
 
 # Initialize Flask Blueprint
 sales_app = Blueprint('sales_app', __name__)

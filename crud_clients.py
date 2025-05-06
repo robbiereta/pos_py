@@ -11,8 +11,15 @@ app = Flask(__name__)
 # Configure MongoDB
 mongodb_uri = os.getenv('MONGODB_URI')
 client = MongoClient(mongodb_uri)
+
+# Determine the environment (production or development)
+ENVIRONMENT = os.getenv('POS_ENV', 'production')
+
+# Set collection suffix based on environment
+COLLECTION_SUFFIX = '_development' if ENVIRONMENT == 'development' else ''
+
 db = client['pos_db']
-clients_collection = db['clients']
+clients_collection = db[f'clients{COLLECTION_SUFFIX}']
 
 @app.route('/api/clients', methods=['POST'])
 def create_client():

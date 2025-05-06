@@ -1,25 +1,22 @@
 import pandas as pd
-import json
 from datetime import datetime, timedelta
 from collections import defaultdict
 from flask import Flask
 from pymongo import MongoClient
-from models import Sale, Client, SaleDetail, Product
 import os
 from dotenv import load_dotenv
-from config import config
 
 # Load environment variables
 load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-    
+
     try:
         # Configure MongoDB
-        mongodb_uri = os.getenv("MONGODB_URI")    
+        mongodb_uri = os.getenv("MONGODB_URI_DEVELOPMENT")    
         if not mongodb_uri:
-            raise ValueError("MONGODB_URI not found in environment variables")
+            raise ValueError("MONGODB_URI_DEVELOPMENT not found in environment variables")
         
         # Initialize MongoDB using PyMongo directly
         client = MongoClient(mongodb_uri)
@@ -63,23 +60,25 @@ def convertir_e_importar_ventas(archivo_origen):
             # Obtener o crear cliente por defecto
             cliente_default = db.clients.find_one({"name": "Cliente General"})
             if not cliente_default:
-                cliente_default = Client.create_client(
-                    db,
-                    name="Cliente General",
-                    email="general@example.com",
-                    phone="0000000000"
-                )
+                cliente_default = {
+                    "name": "Cliente General",
+                    "email": "general@example.com",
+                    "phone": "0000000000"
+                }
+                result = db.clients.insert_one(cliente_default)
+                cliente_default['_id'] = result.inserted_id
 
             # Obtener o crear producto por defecto
             producto_default = db.products.find_one({"name": "Venta General"})
             if not producto_default:
-                producto_default = Product.create_product(
-                    db,
-                    name="Venta General",
-                    description="Venta sin producto específico",
-                    price=0.0,
-                    stock=999999
-                )
+                producto_default = {
+                    "name": "Venta General",
+                    "description": "Venta sin producto específico",
+                    "price": 0.0,
+                    "stock": 999999
+                }
+                result = db.products.insert_one(producto_default)
+                producto_default['_id'] = result.inserted_id
             
             print("\nIniciando procesamiento de ventas...")
             
@@ -179,6 +178,6 @@ def convertir_e_importar_ventas(archivo_origen):
             return {'status': 'error'}
 
 if __name__ == "__main__":
-    archivo_origen = "_ventas_abril25_1y2sem.xlsx"
+    archivo_origen = "ventas_abril_2quin.xlsx"
     resultado = convertir_e_importar_ventas(archivo_origen)
     print(f"\nEstado final: {resultado['status']}")

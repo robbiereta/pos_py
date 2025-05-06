@@ -10,8 +10,15 @@ employee_app = Blueprint('employee_app', __name__)
 # Configure MongoDB
 mongodb_uri = os.getenv('MONGODB_URI')
 client = MongoClient(mongodb_uri)
+
+# Determine the environment (production or development)
+ENVIRONMENT = os.getenv('POS_ENV', 'production')
+
+# Set collection suffix based on environment
+COLLECTION_SUFFIX = '_development' if ENVIRONMENT == 'development' else ''
+
 db = client['pos_db']
-employees_collection = db['employees']
+employees_collection = db[f'employees{COLLECTION_SUFFIX}']
 
 @employee_app.route('/api/employees', methods=['POST'])
 def create_employee():

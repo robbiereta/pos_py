@@ -1,269 +1,332 @@
-from flask import Flask, request, jsonify, render_template, make_response, send_file
+from flask import Flask, jsonify, request, session, redirect, url_for
 from flask_cors import CORS
+from convertir_ventas import create_app
+from corte_caja_mongo import CorteCajaMongo
 from datetime import datetime
-from cfdi_generator import CFDIGenerator
-from config import config
-from db import init_db, get_db
-import os
-from dotenv import load_dotenv
-import pandas as pd
-from werkzeug.utils import secure_filename
-import requests
-from routes.export import export_bp
-from routes.invoice_ocr import invoice_ocr_bp
-from routes.products import products_bp
-import pytesseract
-from PIL import Image
-import io
 from bson import ObjectId
-from pymongo import MongoClient
-import unittest
+import json
+from cfdi_generator import CFDIGenerator
+from werkzeug.security import check_password_hash, generate_password_hash
+from flask_login import (  
+    LoginManager,
+    login_user,
+    login_required,
+    logout_user,
+    UserMixin
+)
+import requests
 
-# Load environment variables
-load_dotenv()
-
-# Create the Flask application
-app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-
-# Load configuration
-app.config.from_object(config['default'])
-
-# Initialize MongoDB
-mongo = init_db(app)
-app.db = mongo.db  # Add db instance to app context
-
-# Import models
-from models import Sale, Product, Client, GlobalInvoice
-
-# Register blueprints
+# Import CRUD modules
+from crud_sales import sales_app as sales_bp
 from routes.clients import clients_bp
-app.register_blueprint(clients_bp)
-app.register_blueprint(export_bp)
-app.register_blueprint(invoice_ocr_bp)
-app.register_blueprint(products_bp)
+from issuer_crud import issuer_app as issuer_bp
+from employee_crud import employee_app as employee_bp
+from routes.products import products_bp
 
-# Configuration for image uploads
-UPLOAD_FOLDER = 'static/remisiones'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+app = create_app()
+app.secret_key = 'your_secret_key_here'  # Set a secret key for session management
+# Configure CORS to allow requests from frontend
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})  # Enable CORS for frontend requests
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Register blueprints for CRUD operations
+app.register_blueprint(sales_bp, url_prefix='/api/sales')
+app.register_blueprint(clients_bp, url_prefix='/api/clients')
+app.register_blueprint(issuer_bp, url_prefix='/api/issuer')
+app.register_blueprint(employee_bp, url_prefix='/api/employee')
+app.register_blueprint(products_bp, url_prefix='/api/products')
+# Helper para convertir ObjectId a string
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        if isinstance(o, datetime):
+            return o.isoformat()
+        return json.JSONEncoder.default(self, o)
 
-# Helper functions
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# Configurar el encoder personalizado
+app.json_encoder = JSONEncoder
 
-def process_remision_image(image_path):
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# Sample user data for demonstration
+users = {
+    "user1": {"password": generate_password_hash("hashed_password"), "role": "issuer"},
+    "user2": {"password": generate_password_hash("hashed_password"), "role": "employee"}
+}
+
+# Define a User class
+class User(UserMixin):
+    def __init__(self, username, role):
+        self.id = username
+        self.role = role
+
+@login_manager.user_loader
+def load_user(user_id):
+    user = users.get(user_id)
+    if user:
+        return User(user_id, user['role'])
+    return None
+
+
+@app.route('/api/cortes', methods=['GET'])
+def get_cortes():
     try:
-        # Configure Tesseract path
-        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+        cortes = CorteCajaMongo(app.db)
+        fecha_inicio = request.args.get('fecha_inicio')
+        fecha_fin = request.args.get('fecha_fin')
         
-        # Open and process the image
-        img = Image.open(image_path)
-        text = pytesseract.image_to_string(img, lang='spa')
-        
-        # Process the extracted text
-        lines = text.split('\n')
-        items = []
-        
-        for line in lines:
-            if not line.strip():
-                continue
-                
-            parts = line.split()
-            if len(parts) >= 4:
-                try:
-                    # Find the index of Pza/Par/Pllo/Kit
-                    unit_index = -1
-                    for i, part in enumerate(parts):
-                        if part in ['Pza', 'Par', 'Pllo', 'Kit']:
-                            unit_index = i
-                            break
-                    
-                    if unit_index > 0:
-                        code = parts[0]
-                        description = ' '.join(parts[1:unit_index-2])
-                        box_number = int(parts[unit_index-2])
-                        pieces = float(parts[unit_index-1].replace(',', ''))
-                        unit = parts[unit_index]
-                        price = float(parts[unit_index+1].replace('$', ''))
-                        total = float(parts[unit_index+2].replace('$', ''))
-                        
-                        items.append({
-                            'Código': code,
-                            'Descripción': description,
-                            'No. Caja': box_number,
-                            'Piezas': pieces,
-                            'Unidad': unit,
-                            'Precio': price,
-                            'Importe': total
-                        })
-                except Exception as e:
-                    print(f"Error processing line: {line}")
-                    print(f"Error: {str(e)}")
-                    continue
-        
-        return items
+        if fecha_inicio and fecha_fin:
+            inicio = datetime.fromisoformat(fecha_inicio)
+            fin = datetime.fromisoformat(fecha_fin)
+            resultados = cortes.obtener_cortes(inicio, fin)
+        else:
+            resultados = cortes.obtener_cortes()
+            
+        return jsonify(resultados)
     except Exception as e:
-        print(f"Error processing image: {str(e)}")
-        return None
+        return jsonify({'error': str(e)}), 500
 
-# Routes
-@app.route('/upload_remision', methods=['GET', 'POST'])
-def upload_remision():
-    if request.method == 'POST':
-        if 'remision' not in request.files:
-            return 'No file uploaded', 400
-            
-        file = request.files['remision']
-        if file.filename == '':
-            return 'No file selected', 400
-            
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            
-            # Process the image
-            items = process_remision_image(filepath)
-            if items:
-                # Create Excel file in memory
-                output = io.BytesIO()
-                df = pd.DataFrame(items)
-                
-                # Calculate total
-                total = sum(item['Importe'] for item in items)
-                
-                # Create Excel writer
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    df.to_excel(writer, index=False, sheet_name='Remisión')
-                
-                output.seek(0)
-                
-                # Clean up the uploaded file
-                os.remove(filepath)
-                
-                return send_file(
-                    output,
-                    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    as_attachment=True,
-                    download_name=f'remision_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
-                )
-            else:
-                return 'Error processing image', 500
-                
-        return 'Invalid file type', 400
+@app.route('/api/cortes', methods=['POST'])
+def crear_corte():
+    try:
+        data = request.json
+        cortes = CorteCajaMongo(app.db)
         
-    return render_template('upload_remision.html')
+        corte_id = cortes.crear_corte(
+            monto_inicial=data['monto_inicial'],
+            monto_final=data['monto_final'],
+            ventas_efectivo=data.get('ventas_efectivo', 0),
+            ventas_tarjeta=data.get('ventas_tarjeta', 0),
+            ventas_transferencia=data.get('ventas_transferencia', 0),
+            retiros=data.get('retiros', 0),
+            notas=data.get('notas', '')
+        )
+        return jsonify({'id': corte_id}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cortes/<corte_id>', methods=['GET'])
+def get_corte(corte_id):
+    try:
+        cortes = CorteCajaMongo(app.db)
+        corte = cortes.obtener_corte(corte_id)
+        if corte:
+            return jsonify(corte)
+        return jsonify({'error': 'Corte no encontrado'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cortes/totales/<int:anio>/<int:mes>', methods=['GET'])
+def get_totales_mes(anio, mes):
+    try:
+        cortes = CorteCajaMongo(app.db)
+        totales = cortes.obtener_totales_mes(anio, mes)
+        return jsonify(totales)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/generate_cfdi', methods=['POST'])
+def generate_cfdi():
+    try:
+        # Get the payroll data from the request
+        nomina_data = request.json
+        
+        # Generate XML for CFDI 4.0
+        xml_data = generar_xml_nomina_v4(nomina_data)
+        
+        # Certify the CFDI using SW's Sapien API
+        generator = CFDIGenerator()
+        certification_result = generator.certify_cfdi(xml_data)
+        
+        # Return the certification result
+        if certification_result:
+            return jsonify(certification_result), 200
+        else:
+            return jsonify({'error': 'Certification failed'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/products', methods=['GET'])
-def get_products():
-    db = get_db()
-    products = list(db.products.find())
-    for product in products:
-        product['_id'] = str(product['_id'])
-    return jsonify(products)
 
-@app.route('/api/products', methods=['POST'])
-def create_product():
-    data = request.json
-    db = get_db()
-    product = Product.create_product(
-        db,
-        name=data['name'],
-        price=data['price'],
-        stock=data.get('stock', 0),
-        description=data.get('description'),
-        sku=data.get('sku'),
-        image_url=data.get('image_url'),
-        min_stock=data.get('min_stock', 0)
-    )
-    product['_id'] = str(product['_id'])
-    return jsonify(product), 201
+@app.route('/api/login', methods=['POST'])
+def login():
+    try:
+        username = request.json.get('username')
+        password = request.json.get('password')
 
-@app.route('/api/products/<product_id>', methods=['PUT'])
-def update_product(product_id):
-    data = request.json
-    db = get_db()
-    Product.update_product(db, product_id, **data)
-    updated_product = Product.get_by_id(db, product_id)
-    updated_product['_id'] = str(updated_product['_id'])
-    return jsonify(updated_product)
+        user = users.get(username)
+        if user and check_password_hash(user['password'], password):
+            user_obj = User(username, user['role'])
+            login_user(user_obj)
+            return redirect(url_for('home'))
+        else:
+            return jsonify({'error': 'Invalid credentials'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-@app.route('/api/sales', methods=['POST'])
-def create_sale():
-    data = request.json
-    db = get_db()
-    cliente_default = db.clients.find_one({"name": "Cliente General"})
-    if not cliente_default:
-            cliente_default = Client.create_client(
-                db,
-                name="Cliente General",
-                email="general@example.com",
-                phone="0000000000"
-            )
+@app.route('/api/logout')
+@login_required
+def logout():
+    logout_user()
+    return jsonify({'message': 'Logged out successfully'})
 
-    # Todas las ventas son en efectivo
-    metodo_pago = 'efectivo'
+@app.route('/api/users', methods=['GET'])
+@login_required
+def get_users():
+    try:
+        if session.get('role') == 'issuer':
+            # Logic to get users
+            return jsonify({'users': list(users.keys())})
+        else:
+            return jsonify({'error': 'Unauthorized'}), 403
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    try:
+        username = request.json.get('username')
+        password = request.json.get('password')
+        role = request.json.get('issuer')
+
+        if username in users:
+            return jsonify({'error': 'User already exists'}), 400
+
+        hashed_password = generate_password_hash(password)
+        users[username] = {'password': hashed_password, 'role': role}
+
+        return jsonify({'message': 'User registered successfully'}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/mercadolibre/products', methods=['GET'])
+def get_mercadolibre_products():
+    query = request.args.get('query')
+    if not query:
+        return jsonify({'error': 'Query parameter is required'}), 400
     
-    # Crear la venta
-    venta = {
-                    'timestamp': datetime.now(),
-                    'total': str(data['total_amount']),
-                    'payment_method': metodo_pago,
-                    'client_id': str(cliente_default['_id']),
-                    'products': [str(data['details'][0]['product_id'])]
+    url = f'https://api.mercadolibre.com/sites/MLA/search?q={query}'
+    response = requests.get(url)
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to fetch data from MercadoLibre'}), response.status_code
+    
+    data = response.json()
+    return jsonify(data), 200
+
+@app.route('/api/generate_client_cfdi', methods=['POST'])
+@login_required
+def generate_client_cfdi():
+    try:
+        data = request.json
+        nota_venta = data.get('nota_venta')
+        
+        if not nota_venta:
+            return jsonify({'error': 'Se requiere el ID de la nota de venta'}), 400
+            
+        app_instance = create_app()
+        with app_instance.app_context():
+            # Obtener venta específica por ID
+            sale = app_instance.db.sales.find_one({"_id": nota_venta})
+            
+            if not sale:
+                return jsonify({'error': f"No se encontró la venta con ID {nota_venta}" }), 404
+            
+            # Verificar si ya fue facturada
+            if sale.get('facturada', False):
+                return jsonify({'error': 'Esta venta ya ha sido facturada'}), 400
+                
+            # Obtener información del cliente
+            client_id = sale.get('client_id')
+            client = app_instance.db.clients.find_one({"_id": client_id}) if client_id else None
+            
+            if not client:
+                return jsonify({'error': 'No se encontró información del cliente. No se puede generar factura'}), 404
+            
+            # Calcular totales
+            total_amount = sale.get('total_amount', 0)
+            # El IVA ya está incluido en el total, así que lo extraemos (16%)
+            subtotal = total_amount / 1.16
+            tax_amount = total_amount - subtotal
+            
+            # Obtener fecha actual
+            fecha_emision = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            
+            # Preparar conceptos (productos) de la venta
+            conceptos = []
+            for item in sale.get('items', []):
+                concepto = {
+                    'ClaveProdServ': item.get('product_code', '01010101'),
+                    'Cantidad': item.get('quantity', 1),
+                    'ClaveUnidad': item.get('unit_code', 'H87'),
+                    'Unidad': item.get('unit', 'Pieza'),
+                    'Descripcion': item.get('description', 'Producto'),
+                    'ValorUnitario': item.get('price', 0),
+                    'Importe': item.get('total', 0),
+                    'Descuento': item.get('discount', 0),
+                    'ObjetoImp': '02',  # Objeto de impuesto
+                    'Impuestos': {
+                        'Traslados': [{
+                            'Base': item.get('total', 0) / 1.16,
+                            'Impuesto': '002',  # IVA
+                            'TipoFactor': 'Tasa',
+                            'TasaOCuota': '0.160000',
+                            'Importe': item.get('total', 0) - (item.get('total', 0) / 1.16)
+                        }]
+                    }
                 }
-    
-    # Guardar en MongoDB
-    db.sales.insert_one(venta)
-    
-    # Update product stock
-    for detail in data['details']:
-        product = Product.get_by_id(db, detail['product_id'])
-        if product:
-            new_stock = product['stock'] - detail['quantity']
-            Product.update_product(db, detail['product_id'], stock=new_stock)
-    
-    sale = db.sales.find_one({"_id": venta['_id']})
-    sale['_id'] = str(sale['_id'])
-    return jsonify(sale), 201
+                conceptos.append(concepto)
+            
+            # Preparar datos para el CFDI
+            cfdi_data = {
+                'Serie': 'A',
+                'Folio': str(nota_venta)[-6:],  # Últimos 6 dígitos del ID de venta
+                'Fecha': fecha_emision,
+                'FormaPago': sale.get('payment_method', '01'),  # 01 - Efectivo
+                'MetodoPago': 'PUE',  # Pago en una sola exhibición
+                'LugarExpedicion': '67100',  # Código postal
+                'Receptor': {
+                    'Rfc': client.get('rfc', 'XAXX010101000'),
+                    'Nombre': client.get('name', 'PUBLICO EN GENERAL'),
+                    'UsoCFDI': client.get('uso_cfdi', 'G03'),  # Gastos en general
+                    'RegimenFiscalReceptor': client.get('regimen_fiscal', '616'),  # Sin obligaciones fiscales
+                    'DomicilioFiscalReceptor': client.get('codigo_postal', '67100')
+                },
+                'Conceptos': conceptos,
+                'Impuestos': {
+                    'TotalImpuestosTrasladados': tax_amount,
+                    'Traslados': [{
+                        'Impuesto': '002',
+                        'TipoFactor': 'Tasa',
+                        'TasaOCuota': '0.160000',
+                        'Importe': tax_amount
+                    }]
+                },
+                'SubTotal': round(subtotal, 2),
+                'Total': round(total_amount, 2)
+            }
+            
+            # Generar CFDI
+            generator = CFDIGenerator()
+            xml_path = generator.generate_cfdi(cfdi_data, f"factura_{nota_venta}.xml")
+            
+            if xml_path:
+                # Actualizar estado de la venta
+                app_instance.db.sales.update_one(
+                    {"_id": nota_venta},
+                    {"$set": {"facturada": True, "fecha_factura": datetime.now()}}
+                )
+                return jsonify({'success': True, 'message': 'Factura generada exitosamente', 'xml_path': xml_path}), 200
+            else:
+                return jsonify({'error': 'Error al generar la factura'}), 500
+                
+    except Exception as e:
+        return jsonify({'error': f"Error al generar factura: {str(e)}"}), 500
 
-@app.route('/api/sales/<sale_id>', methods=['GET'])
-def get_sale(sale_id):
-    db = get_db()
-    sale = Sale.get_by_id(db, sale_id)
-    if sale:
-        sale['_id'] = str(sale['_id'])
-        return jsonify(sale)
-    return jsonify({"error": "Sale not found"}), 404
-
-@app.route('/api/clients', methods=['POST'])
-def create_client():
-    data = request.json
-    db = get_db()
-    client = Client.create_client(
-        db,
-        name=data['name'],
-        email=data.get('email'),
-        phone=data.get('phone'),
-        rfc=data.get('rfc'),
-        address=data.get('address')
-    )
-    client['_id'] = str(client['_id'])
-    return jsonify(client), 201
-
-@app.route('/api/clients/<client_id>', methods=['GET'])
-def get_client(client_id):
-    db = get_db()
-    client = Client.get_by_id(db, client_id)
-    if client:
-        client['_id'] = str(client['_id'])
-        return jsonify(client)
-    return jsonify({"error": "Client not found"}), 404
-
+@app.route('/home')
+def home():
+    return "Welcome to the home page!"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5003)

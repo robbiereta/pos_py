@@ -1,5 +1,12 @@
 from datetime import datetime
 from bson import ObjectId
+import os
+
+# Determine the environment (production or development)
+ENVIRONMENT = os.getenv('POS_ENV', 'production')
+
+# Set collection suffix based on environment
+COLLECTION_SUFFIX = '_development' if ENVIRONMENT == 'development' else ''
 
 class CorteCajaMongo:
     def __init__(self, db):
@@ -8,7 +15,7 @@ class CorteCajaMongo:
         db: instancia de la base de datos MongoDB
         """
         self.db = db
-        self.collection = db.cortes_caja
+        self.collection = db[f'cortes_caja{COLLECTION_SUFFIX}']
 
     def crear_corte(self, monto_inicial, monto_final, ventas_efectivo=0, 
                    ventas_tarjeta=0, ventas_transferencia=0, retiros=0, notas=""):

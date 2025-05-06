@@ -1,0 +1,66 @@
+service: pos-system
+
+provider:
+  name: aws
+  runtime: python3.8
+  region: us-east-1
+  memorySize: 128
+  timeout: 30
+  environment:
+    STAGE: development
+    DB_NAME: dev_pos_db
+    DB_USER: ${{secrets.DB_USER}}
+    DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+    DB_HOST: ${{secrets.DB_HOST}}
+    DB_PORT: ${{secrets.DB_PORT}}
+
+functions:
+  api:
+    handler: lambda_handler.lambda_handler
+    events:
+      - http:
+          path: /
+          method: ANY
+          cors: true
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+    environment:
+      FLASK_ENV: production
+      DATABASE_URL: ${param:databaseUrl}
+      SECRET_KEY: ${param:secretKey}
+      SW_URL: ${param:swUrl}
+      SW_TOKEN: ${param:swToken}
+      SAT_RFC: ${param:satRfc}
+      SAT_NOMBRE: ${param:satNombre}
+      SAT_REGIMEN_FISCAL: ${param:satRegimenFiscal}
+      SAT_CP: ${param:satCp}
+
+package:
+  individually: true
+  include:
+    - app.py
+    - requirements.txt
+    - config.py
+    - db.py
+    - models.py
+    - routes/**
+    - static/**
+    - templates/**
+  exclude:
+    - venv/**
+    - .git/**
+    - tests/**
+    - __pycache__/**
+
+plugins:
+  - serverless-python-requirements
+  - serverless-wsgi
+
+custom:
+  wsgi:
+    app: app.app
+    packRequirements: false
+  pythonRequirements:
+    dockerizePip: non-linux

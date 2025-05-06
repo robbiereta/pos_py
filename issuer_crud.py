@@ -6,11 +6,17 @@ import os
 # Initialize Flask Blueprint
 issuer_app = Blueprint('issuer_app', __name__)
 
+# Determine the environment (production or development)
+ENVIRONMENT = os.getenv('POS_ENV', 'production')
+
+# Set collection suffix based on environment
+COLLECTION_SUFFIX = '_development' if ENVIRONMENT == 'development' else ''
+
 # Configure MongoDB
 mongodb_uri = os.getenv('MONGODB_URI')
 client = MongoClient(mongodb_uri)
 db = client['pos_db']
-emisores_collection = db['emisores']
+emisores_collection = db[f'emisores{COLLECTION_SUFFIX}']
 
 @issuer_app.route('/api/emisores', methods=['POST'])
 def create_emitter():
