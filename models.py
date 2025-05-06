@@ -162,28 +162,19 @@ class Invoice:
 class GlobalInvoice:
     @staticmethod
     def create_global_invoice(db, date, total_amount, tax_amount, cfdi_uuid, folio, json_content, sale_ids):
-        global_invoice = {
+        invoice = {
             "date": date,
             "total_amount": float(total_amount),
             "tax_amount": float(tax_amount),
             "cfdi_uuid": cfdi_uuid,
             "folio": folio,
             "json_content": json_content,
-            "created_at": datetime.now(timezone.utc),
-            "sale_ids": [ObjectId(sale_id) for sale_id in sale_ids]
+            "sale_ids": sale_ids,
+            "created_at": datetime.now(timezone.utc)
         }
-        result = db.global_invoices.insert_one(global_invoice)
-        global_invoice['_id'] = result.inserted_id
-
-        # Update all related sales
-        db.sales.update_many(
-            {"_id": {"$in": global_invoice["sale_ids"]}},
-            {"$set": {
-                "global_invoice_id": result.inserted_id,
-                "is_invoiced": True
-            }}
-        )
-        return global_invoice
+        result = db.global_invoices.insert_one(invoice)
+        invoice['_id'] = result.inserted_id
+        return invoice
 
     @staticmethod
     def get_by_id(db, invoice_id):

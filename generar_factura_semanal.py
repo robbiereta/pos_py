@@ -16,8 +16,8 @@ def generar_factura_semanal(fecha_inicio_str):
             # Convertir la fecha de inicio a datetime
             fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
             # La fecha final es 6 días después (para completar una semana), o hasta el final del mes para la última semana
-            if fecha_inicio_str == '2025-03-22':
-                fecha_fin = datetime(2025, 3, 31, 23, 59, 59)
+            if fecha_inicio_str == '2025-04-16':
+                fecha_fin = datetime(2025, 4, 30, 23, 59, 59)
             else:
                 fecha_fin = fecha_inicio + timedelta(days=6, hours=23, minutes=59, seconds=59)
             
@@ -128,5 +128,5 @@ def generar_factura_semanal(fecha_inicio_str):
             return None
 
 if __name__ == "__main__":
-    # Generar factura para la cuarta semana de marzo 2025, hasta el final del mes
-    generar_factura_semanal('2025-03-22')
+    # Generar factura para la segunda quincena de abril 2025
+    generar_factura_semanal('2025-04-16')
