@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: POS System API
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: /tmp/lambda_package_essential.zip
+      Handler: handler.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Layers:
+        - !Ref DependenciesLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref ServerlessRestApi
+      Environment:
+        Variables:
+          FLASK_ENV: staging
+  DependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: pos-app-dependencies
+      Description: Dependencies for POS App
+      ContentUri: s3://pos-app-lambda-bucket/lambda_layer.zip
+      CompatibleRuntimes:
+        - python3.12
+      LicenseInfo: 'MIT'
+      RetentionPolicy: Retain
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL for Prod stage for POS API"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api/"

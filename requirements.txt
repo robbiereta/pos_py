@@ -14,7 +14,7 @@ Flask==2.3.3
 pymongo==4.6.1
 flask-pymongo==2.3.0
 python-dotenv==1.0.0
-reportlab==3.6.12  # PDF invoice generation
+# reportlab==3.6.12  # PDF invoice generation - commented out due to missing ft2build.h
 qrcode==7.3.1  # For generating QR codes on invoices
 gunicorn==21.2.0
 python-dateutil==2.8.2
@@ -27,3 +27,4 @@ pandas         # Data manipulation
 openpyxl==3.1.2      # Excel file handling
 opencv-python==4.11.0.86
 numpy
+mangum==0.17.0  # For AWS Lambda compatibility with Flask

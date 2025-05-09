@@ -85,3 +85,22 @@ awscliv2.zip
 # Temporary files
 _temp*
 temp_*
+venv/
+node_modules/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+.pytest_cache/
+.vscode/
+instance/
+build/
+dist/
+awscliv2.zip
+aws_temp/
+sam-installation/
+*.xlsx
+*.jpg
+*.zip
+static/
+tests/
