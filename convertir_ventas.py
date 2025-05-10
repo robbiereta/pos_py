@@ -23,7 +23,7 @@ def create_app():
         
         # Initialize MongoDB using PyMongo directly
         client = MongoClient(mongodb_uri)
-        db = client['pos_db_p']  # Use explicit database name
+        db = client['pos_db']  # Use explicit database name
         
         # Test connection
         client.server_info()
