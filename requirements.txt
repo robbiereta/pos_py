@@ -22,7 +22,7 @@ Werkzeug==2.3.7
 pytest==8.3.4
 pytest-cov==6.0.0
 pytesseract==0.3.10    # OCR functionality
-Pillow==10.0.0        # Image processing
+Pillow==11.3.0        # Image processing
 pandas         # Data manipulation
 openpyxl==3.1.2      # Excel file handling
 opencv-python==4.11.0.86

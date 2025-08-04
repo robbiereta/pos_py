@@ -9,17 +9,28 @@ def generar_factura_global():
     
     with app.app_context():
         try:
-            # Obtener ventas no facturadas
-            sales = list(app.db.sales.find({"is_invoiced": False}))
+            # Obtener ventas de julio 2025 que no estén marcadas como facturadas
+            start_date = datetime(2025, 7, 1)
+            end_date = datetime(2025, 8, 1)  # 1 de agosto para incluir todo julio
+            
+            # Consulta que incluye ventas donde is_invoiced es False o no existe
+            sales = list(app.db.sales.find({
+                "$or": [
+                    {"is_invoiced": False},
+                    {"is_invoiced": {"$exists": False}}
+                ],
+                "sale_date": {"$gte": start_date, "$lt": end_date}
+            }))
             
             if not sales:
-                print("No hay ventas pendientes por facturar.")
+                print("No hay ventas pendientes por facturar para julio 2025.")
                 return
             
             print(f"\nGenerando factura global para {len(sales)} ventas...")
             
             # Calcular totales
-            total_amount = sum(sale['total_amount'] for sale in sales)
+            # Convertir los montos a float y sumarlos
+            total_amount = sum(float(sale['total']) for sale in sales)
             # El IVA ya está incluido en el total, así que lo extraemos (16%)
             subtotal = total_amount / 1.16
             tax_amount = total_amount - subtotal
@@ -29,11 +40,12 @@ def generar_factura_global():
 
             print(f"\nGenerating Global CFDI for {len(sales)} sales on {current_datetime.strftime('%Y-%m-%d %H:%M:%S')}")
 
-            # Initialize CFDI Generator
-            cfdi_generator = CFDIGenerator(test_mode=False)
+            # Initialize CFDI Generator in test mode
+            cfdi_generator = CFDIGenerator(test_mode=True)
+            print("Modo de prueba activado - No se realizarán llamadas reales al SAT")
 
             # Generate CFDI
-            result = cfdi_generator.generate_global_cfdi(sales, current_datetime)
+            result = cfdi_generator.generate_global_cfdi(sales, current_datetime, db=app.db)
             
             # Print result
             print("\nCFDI Generated Successfully!")
@@ -48,7 +60,7 @@ def generar_factura_global():
                 tax_amount=tax_amount,
                 cfdi_uuid=result['uuid'],
                 folio=result['folio'],
-                xml_content=result['xml'],
+                json_content=result,  # Usando el resultado completo como JSON
                 sale_ids=[sale['_id'] for sale in sales]
             )
             

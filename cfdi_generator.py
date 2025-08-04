@@ -57,9 +57,9 @@ class CFDIGenerator:
         conceptos = []
         for sale in sales:
             # Extract subtotal from total (VAT is included)
-            total_amount = float(sale['total_amount'])
-            subtotal = round(total_amount / 1.16, 2)
-            tax_amount = round(total_amount - subtotal, 2)
+            total = float(sale['total'])  # Usando el campo 'total' en lugar de 'amount'
+            subtotal = round(total / 1.16, 2)
+            tax_amount = round(total - subtotal, 2)
             
             # Get sale details if available
             sale_details = []

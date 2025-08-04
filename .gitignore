@@ -67,10 +67,6 @@ ENV/
 # Large files and folders
 aws
 awscliv2.zip
-
-# Excel files
-*.xlsx
-
 # JSON files
 *.json
 
